@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface UserConsumerPort {
 
-    Mono<UserConsumer> findByDocument( String document );
+    Mono<UserConsumer> getUserByDocument( String document );
 
 }

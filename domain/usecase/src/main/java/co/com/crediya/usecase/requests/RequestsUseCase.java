@@ -22,7 +22,7 @@ public class RequestsUseCase implements RequestsServicePort {
 
         return RequestsValidator.validateCreateRequests(requests)
                 .flatMap( validRequests -> {
-                    return userConsumerPort.findByDocument(validRequests.getUserDocument())
+                    return userConsumerPort.getUserByDocument(validRequests.getUserDocument())
                             .thenReturn(validRequests)
                             .onErrorMap( (e) -> new CrediyaResourceNotFoundException(ExceptionMessages.USER_WITH_DOCUMENT_NOT_FOUND.getMessage()));
                 })
