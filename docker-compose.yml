@@ -1,0 +1,18 @@
+
+services:
+  mysql-db-requests:
+    container_name: db-mysql-requests
+    image: mysql:8.0.32
+    ports:
+      - 3307:3306
+    volumes:
+      - requests-volume:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=pwduser
+      - MYSQL_DATABASE=requests
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1234
+
+volumes:
+  requests-volume:
+    external: false
