@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -14,8 +15,8 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class Requests {
 
-    private String amount;
-    private LocalDate dateLimitTerm;
+    private BigDecimal amount;
+    private LocalDate deadline;
     private String notificationEmail;
     private String userDocument;
     private String codeRequestState;

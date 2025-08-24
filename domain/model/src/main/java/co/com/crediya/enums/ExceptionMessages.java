@@ -2,13 +2,10 @@ package co.com.crediya.enums;
 
 public enum ExceptionMessages {
 
-    FIELD_NAME_REQUIRED("Field name is required"),
-    FIELD_LAST_NAME_REQUIRED("Field lastName is required"),
-    FIELD_EMAIL_NOT_VALID("Field email is not valid"),
-    FIELD_PAYMENT_OUT_RANGE("Filed basePayment is out of range"),
-    FIELD_DOCUMENT_MUST_BE_ONLY_NUMBERS("Document must be only numbers"),
-    USER_WITH_EMAIL_EXIST("User with email %s already exists"),
-    USER_WITH_DOCUMENT_EXIST("User with document %s already exists");
+    FIELD_AMOUNT_INVALID("Field amount is not valid."),
+    FIELD_DEADLINE_INVALID("Field deadline must be greater than the current one."),
+    FIELD_USER_DOCUMENT_REQUIRED("Field user document is required."),
+    USER_WITH_DOCUMENT_NOT_FOUND("User with document %s not found.");
 
     private final String message;
 
