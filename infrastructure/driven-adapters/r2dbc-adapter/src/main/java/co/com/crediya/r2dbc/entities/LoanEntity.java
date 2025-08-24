@@ -10,12 +10,12 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Table("requests")
+@Table("loans")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class RequestsEntity {
+public class LoanEntity {
 
     @Id
     private Long id;

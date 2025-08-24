@@ -13,13 +13,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Requests {
+public class Loan {
 
     private BigDecimal amount;
     private LocalDate deadline;
     private String notificationEmail;
     private String userDocument;
-    private String codeRequestState;
+    private String codeLoanState;
     private String codeTypeLoan;
 
 

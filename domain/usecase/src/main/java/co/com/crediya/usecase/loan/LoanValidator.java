@@ -1,32 +1,32 @@
-package co.com.crediya.usecase.requests;
+package co.com.crediya.usecase.loan;
 
 import co.com.crediya.enums.ExceptionMessages;
 import co.com.crediya.exceptions.CrediyaIllegalArgumentException;
-import co.com.crediya.model.Requests;
+import co.com.crediya.model.Loan;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class RequestsValidator {
+public class LoanValidator {
 
     private static final BigDecimal MIN_VALUE_AMOUNT = BigDecimal.ZERO;
 
-    static Mono<Requests> validateCreateRequests( Requests requests ) {
+    static Mono<Loan> validateCreateLoan(Loan loan ) {
 
-        if( requests.getAmount() == null || requests.getAmount().compareTo(MIN_VALUE_AMOUNT) <= 0  ) {
+        if( loan.getAmount() == null || loan.getAmount().compareTo(MIN_VALUE_AMOUNT) <= 0  ) {
             return Mono.error(new CrediyaIllegalArgumentException(ExceptionMessages.FIELD_AMOUNT_INVALID.getMessage()));
         }
 
-        if( requests.getDeadline() == null || requests.getDeadline().isBefore(LocalDate.now()) ) {
+        if( loan.getDeadline() == null || loan.getDeadline().isBefore(LocalDate.now()) ) {
             return Mono.error( new CrediyaIllegalArgumentException( ExceptionMessages.FIELD_DEADLINE_INVALID.getMessage() ) );
         }
 
-        if( requests.getUserDocument() == null || requests.getUserDocument().isEmpty() ) {
+        if( loan.getUserDocument() == null || loan.getUserDocument().isEmpty() ) {
             return Mono.error( new CrediyaIllegalArgumentException( ExceptionMessages.FIELD_USER_DOCUMENT_REQUIRED.getMessage() ) );
         }
 
-        return Mono.just(requests);
+        return Mono.just(loan);
 
 
     }
