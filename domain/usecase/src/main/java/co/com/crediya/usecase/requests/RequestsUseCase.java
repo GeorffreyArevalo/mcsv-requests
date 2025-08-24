@@ -3,7 +3,7 @@ package co.com.crediya.usecase.requests;
 import co.com.crediya.enums.ExceptionMessages;
 import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.model.Requests;
-import co.com.crediya.model.gateways.RequestsRepository;
+import co.com.crediya.model.gateways.RequestsRepositoryPort;
 import co.com.crediya.port.consumers.UserConsumerPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class RequestsUseCase implements RequestsServicePort {
 
-    private final RequestsRepository requestsRepository;
+    private final RequestsRepositoryPort requestsRepositoryPort;
     private final UserConsumerPort userConsumerPort;
 
 
@@ -26,7 +26,7 @@ public class RequestsUseCase implements RequestsServicePort {
                             .thenReturn(validRequests)
                             .onErrorMap( (e) -> new CrediyaResourceNotFoundException(ExceptionMessages.USER_WITH_DOCUMENT_NOT_FOUND.getMessage()));
                 })
-                .flatMap(this::saveRequest)
+                .flatMap(requestsRepositoryPort::save)
                 .doOnSuccess( savedRequests -> {} );
 
     }
