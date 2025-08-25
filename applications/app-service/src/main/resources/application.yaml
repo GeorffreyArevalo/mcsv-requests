@@ -59,3 +59,11 @@ routes:
     loans: "/api/v1/loans"
     loansById: "/api/v1/loans/{id}"
     loansByDocument: "/api/v1/loans/{document}"
+
+springdoc:
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+  api-docs:
+    path: /openapi/v3/api-docs
+  packages-to-scan: co.com.crediya
+  paths-to-match: /**

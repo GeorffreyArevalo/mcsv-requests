@@ -1,4 +1,4 @@
-package co.com.crediya.api.rest.requests;
+package co.com.crediya.api.rest.loan;
 
 import co.com.crediya.api.dtos.loan.CreateLoanRequest;
 import co.com.crediya.api.mappers.LoanMapper;

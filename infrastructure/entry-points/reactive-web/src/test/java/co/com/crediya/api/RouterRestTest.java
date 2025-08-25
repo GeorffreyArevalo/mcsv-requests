@@ -1,7 +1,7 @@
 package co.com.crediya.api;
 
-import co.com.crediya.api.rest.requests.LoanHandler;
-import co.com.crediya.api.rest.requests.LoanRouterRest;
+import co.com.crediya.api.rest.loan.LoanHandler;
+import co.com.crediya.api.rest.loan.LoanRouterRest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
