@@ -22,7 +22,7 @@ public class TypeLoanEntity {
     private String name;
     private BigDecimal minAmount;
     private BigDecimal maxAmount;
-    private  BigDecimal interestRate;
+    private BigDecimal interestRate;
     private Boolean autoValidation;
 
 

@@ -3,6 +3,7 @@ package co.com.crediya.api.rest.requests;
 import co.com.crediya.api.dtos.loan.CreateLoanRequest;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.usecase.loan.LoanServicePort;
+import co.com.crediya.usecase.typeloan.TypeLoanServicePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -20,6 +21,8 @@ import java.net.URI;
 public class LoanHandler {
 
     private final LoanServicePort loanServicePort;
+    private final TypeLoanServicePort typeLoanServicePort;
+
     private final LoanMapper loanMapper;
     private final TransactionalOperator transactionalOperator;
 
@@ -28,7 +31,11 @@ public class LoanHandler {
 
         return serverRequest.bodyToMono(CreateLoanRequest.class)
                 .doOnNext( loanRequest -> log.info("Saving loan request={}", loanRequest) )
-                .map(loanMapper::createRequestToModel)
+                .flatMap( loanRequest ->
+                                typeLoanServicePort.findByCode(loanRequest.codeTypeLoan())
+                                .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()))
+                                .doOnError(throwable -> log.warn("Error saving loan={}", loanRequest))
+                )
                 .flatMap( loanServicePort::saveLoan )
                 .map( loanMapper::modelToResponse )
                 .flatMap( savedLoan ->

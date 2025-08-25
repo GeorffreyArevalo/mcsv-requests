@@ -7,6 +7,7 @@ public record CreateLoanRequest(
         BigDecimal amount,
         LocalDate deadline,
         String notificationEmail,
-        String userDocument
+        String userDocument,
+        String codeTypeLoan
 ) {
 }

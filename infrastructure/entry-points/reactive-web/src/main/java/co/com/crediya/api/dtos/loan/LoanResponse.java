@@ -7,6 +7,8 @@ public record LoanResponse(
         BigDecimal amount,
         LocalDate deadline,
         String notificationEmail,
-        String userDocument
+        String userDocument,
+        Long idLoanState,
+        Long idTypeLoan
 ) {
 }

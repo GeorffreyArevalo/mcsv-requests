@@ -23,5 +23,7 @@ public class LoanEntity {
     private LocalDate deadline;
     private String notificationEmail;
     private String userDocument;
+    private Long idTypeLoan;
+    private Long idLoanState;
 
 }

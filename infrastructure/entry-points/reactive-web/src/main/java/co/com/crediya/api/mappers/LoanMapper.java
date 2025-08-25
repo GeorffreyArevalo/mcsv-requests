@@ -4,6 +4,7 @@ import co.com.crediya.api.dtos.loan.CreateLoanRequest;
 import co.com.crediya.api.dtos.loan.LoanResponse;
 import co.com.crediya.model.Loan;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
@@ -13,7 +14,12 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface LoanMapper {
 
-    Loan createRequestToModel(CreateLoanRequest request);
+
+    @Mapping(
+            source = "idTypeLoan",
+            target = "idTypeLoan"
+    )
+    Loan createRequestToModel(CreateLoanRequest request, Long idTypeLoan);
     LoanResponse  modelToResponse(Loan model);
 
 
