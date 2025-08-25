@@ -5,7 +5,7 @@ import co.com.crediya.exceptions.enums.ExceptionMessages;
 import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
-import co.com.crediya.model.gateways.LoanStatusRepositoryPort;
+import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.port.consumers.UserConsumerPort;
 import co.com.crediya.ports.CrediyaLoggerPort;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 public class LoanUseCase implements LoanServicePort {
 
     private final LoanRepositoryPort loanRepositoryPort;
-    private final LoanStatusRepositoryPort loanStatusRepositoryPort;
+    private final LoanStateRepositoryPort loanStateRepositoryPort;
     private final UserConsumerPort userConsumerPort;
     private final CrediyaLoggerPort logger;
 
@@ -30,7 +30,7 @@ public class LoanUseCase implements LoanServicePort {
                 .onErrorMap( e ->  new CrediyaResourceNotFoundException(
                             String.format( ExceptionMessages.USER_WITH_DOCUMENT_NOT_FOUND.getMessage(), loan.getUserDocument() ))
                 ))
-                .flatMap( currentLoan ->  loanStatusRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
+                .flatMap( currentLoan ->  loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
                 .map( loanStatus ->  {
                     currentLoan.setIdLoanState(loanStatus.getId());
                     return currentLoan;
