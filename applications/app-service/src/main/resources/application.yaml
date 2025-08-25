@@ -58,7 +58,6 @@ routes:
   paths:
     loans: "/api/v1/loans"
     loansById: "/api/v1/loans/{id}"
-    loansByDocument: "/api/v1/loans/{document}"
 
 springdoc:
   swagger-ui:
