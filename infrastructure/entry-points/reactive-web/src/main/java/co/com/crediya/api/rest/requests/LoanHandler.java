@@ -27,6 +27,7 @@ public class LoanHandler {
     public Mono<ServerResponse> listenSaveLoan(ServerRequest serverRequest) {
 
         return serverRequest.bodyToMono(CreateLoanRequest.class)
+                .doOnNext( loanRequest -> log.info("Saving loan request={}", loanRequest) )
                 .map(loanMapper::createRequestToModel)
                 .flatMap( loanServicePort::saveLoan )
                 .map( loanMapper::modelToResponse )

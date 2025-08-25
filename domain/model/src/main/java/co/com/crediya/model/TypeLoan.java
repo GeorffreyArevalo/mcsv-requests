@@ -1,26 +1,24 @@
 package co.com.crediya.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Loan {
+public class TypeLoan {
 
-    private BigDecimal amount;
-    private LocalDate deadline;
-    private String notificationEmail;
-    private String userDocument;
-    private Long idLoanState;
-    private Long idTypeLoan;
-
+    private Long id;
+    private String code;
+    private String name;
+    private BigDecimal minAmount;
+    private BigDecimal maxAmount;
+    private  BigDecimal interestRate;
+    private Boolean autoValidation;
 
 }

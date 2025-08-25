@@ -18,19 +18,19 @@ public class CustomErrorAttributes extends DefaultErrorAttributes {
     public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
         Throwable error = getError(request);
 
-        if( error instanceof CrediyaException) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            CrediyaException customException = (CrediyaException) error;
-            CustomError customError = CustomError.builder()
-                    .statusCode(customException.getStatusCode().getStatusCode())
-                    .message(customException.getMessage())
-                    .timestamp(LocalDateTime.now())
-                    .build();
-            errorResponse.put("error", customError);
-            return  errorResponse;
+        if( !(error instanceof CrediyaException customException) ) {
+            return super.getErrorAttributes(request, options);
         }
+        Map<String, Object> errorResponse = new HashMap<>();
+        CustomError customError = CustomError.builder()
+                .statusCode(customException.getStatusCode().getStatusCode())
+                .message(customException.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        errorResponse.put("error", customError);
+        return  errorResponse;
 
 
-        return super.getErrorAttributes(request, options);
+
     }
 }

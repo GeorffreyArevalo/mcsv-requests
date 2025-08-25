@@ -21,7 +21,7 @@ public class UserRestConsumer implements UserConsumerPort {
     public Mono<UserConsumer> getUserByDocument(String document) {
         return client
                 .get()
-                .uri("/api/users/users/{document}", document)
+                .uri("/api/v1/users/byDocument/{document}", document)
                 .retrieve()
                 .bodyToMono(UserResponse.class)
                 .map( userConsumerMapper::toUserConsumer );

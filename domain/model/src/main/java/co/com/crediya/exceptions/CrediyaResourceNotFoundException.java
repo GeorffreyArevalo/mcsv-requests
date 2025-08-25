@@ -1,6 +1,6 @@
 package co.com.crediya.exceptions;
 
-import co.com.crediya.enums.ExceptionStatusCode;
+import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 
 public class CrediyaResourceNotFoundException extends CrediyaException {
 

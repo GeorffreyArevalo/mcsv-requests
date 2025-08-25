@@ -1,6 +1,6 @@
 package co.com.crediya.usecase.loan;
 
-import co.com.crediya.enums.ExceptionMessages;
+import co.com.crediya.exceptions.enums.ExceptionMessages;
 import co.com.crediya.exceptions.CrediyaIllegalArgumentException;
 import co.com.crediya.model.Loan;
 import reactor.core.publisher.Mono;
