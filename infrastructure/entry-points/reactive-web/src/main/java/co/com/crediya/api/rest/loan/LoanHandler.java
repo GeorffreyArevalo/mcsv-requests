@@ -5,6 +5,7 @@ import co.com.crediya.api.dtos.loan.LoanResponse;
 import co.com.crediya.api.exception.model.CustomError;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.util.HandlersUtil;
+import co.com.crediya.ports.TransactionManagement;
 import co.com.crediya.usecase.loan.LoanServicePort;
 import co.com.crediya.usecase.typeloan.TypeLoanServicePort;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,7 @@ public class LoanHandler {
     private final LoanServicePort loanServicePort;
     private final TypeLoanServicePort typeLoanServicePort;
     private final Validator validator;
+    private final TransactionManagement transactionManagement;
 
     private final LoanMapper loanMapper;
 
@@ -56,7 +58,7 @@ public class LoanHandler {
                     return typeLoanServicePort.findByCode(loanRequest.codeTypeLoan())
                         .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()))
                         .doOnError(throwable -> log.warn("Error saving loan={}", loanRequest))
-                        .flatMap( loanServicePort::saveLoan )
+                        .flatMap( saveLoan -> transactionManagement.inTransaction(loanServicePort.saveLoan(saveLoan))  )
                         .map( loanMapper::modelToResponse )
                         .flatMap( savedLoan ->
                             ServerResponse.created(URI.create(""))

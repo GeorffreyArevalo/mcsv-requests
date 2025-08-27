@@ -6,6 +6,7 @@ import co.com.crediya.api.dtos.loan.LoanResponse;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
+import co.com.crediya.ports.TransactionManagement;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.assertj.core.api.Assertions;
@@ -47,6 +48,9 @@ class LoanRouterRestTest {
 
     @MockitoBean
     private LoanMapper loanMapper;
+
+    @MockitoBean
+    private TransactionManagement transactionManagement;
 
     private CreateLoanRequest createLoanRequest;
     private CreateLoanRequest createBadLoanRequest;
@@ -134,6 +138,9 @@ class LoanRouterRestTest {
 
         when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
         when( loanMapper.createRequestToModel( any( CreateLoanRequest.class ), any() ) ).thenReturn( loan );
+
+        when(transactionManagement.inTransaction(any(Mono.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         webTestClient.post()
                 .uri(LOANS_PATH)
