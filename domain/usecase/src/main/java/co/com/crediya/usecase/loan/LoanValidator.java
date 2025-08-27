@@ -12,17 +12,19 @@ public class LoanValidator {
 
     private static final BigDecimal MIN_VALUE_AMOUNT = BigDecimal.ZERO;
 
+    private LoanValidator() {}
+
     static Mono<Loan> validateCreateLoan(Loan loan ) {
 
-        if( loan.getAmount() == null || loan.getAmount().compareTo(MIN_VALUE_AMOUNT) <= 0  ) {
+        if( loan.getAmount().compareTo(MIN_VALUE_AMOUNT) <= 0  ) {
             return Mono.error(new CrediyaIllegalArgumentException(ExceptionMessages.FIELD_AMOUNT_INVALID.getMessage()));
         }
 
-        if( loan.getDeadline() == null || loan.getDeadline().isBefore(LocalDate.now()) ) {
+        if( loan.getDeadline().isBefore(LocalDate.now()) ) {
             return Mono.error( new CrediyaIllegalArgumentException( ExceptionMessages.FIELD_DEADLINE_INVALID.getMessage() ) );
         }
 
-        if( loan.getUserDocument() == null || loan.getUserDocument().isEmpty() ) {
+        if( loan.getUserDocument().isEmpty() ) {
             return Mono.error( new CrediyaIllegalArgumentException( ExceptionMessages.FIELD_USER_DOCUMENT_REQUIRED.getMessage() ) );
         }
 

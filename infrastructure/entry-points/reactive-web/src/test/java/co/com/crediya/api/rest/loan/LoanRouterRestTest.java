@@ -3,6 +3,7 @@ package co.com.crediya.api.rest.loan;
 import co.com.crediya.api.config.PathsConfig;
 import co.com.crediya.api.dtos.loan.CreateLoanRequest;
 import co.com.crediya.api.dtos.loan.LoanResponse;
+import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
 import co.com.crediya.usecase.loan.LoanUseCase;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {LoanRouterRest.class, LoanHandler.class})
@@ -43,8 +45,14 @@ class LoanRouterRestTest {
     @MockitoBean
     private TypeLoanUseCase typeLoanUseCase;
 
+    @MockitoBean
+    private LoanMapper loanMapper;
+
     private CreateLoanRequest createLoanRequest;
+    private CreateLoanRequest createBadLoanRequest;
+    private LoanResponse loanResponse;
     private Loan loan;
+    private Loan badLoan;
 
     private TypeLoan typeLoan;
 
@@ -53,7 +61,6 @@ class LoanRouterRestTest {
 
     @BeforeEach
     void setUp() {
-
 
         typeLoan = TypeLoan.builder()
                 .id(1L)
@@ -73,6 +80,23 @@ class LoanRouterRestTest {
                 "LIBRE_INVERSION"
         );
 
+        createBadLoanRequest = new CreateLoanRequest(
+                new BigDecimal("10.0"),
+                LocalDate.now(),
+                "geoeffrey@arevalo.com",
+                "",
+                "LIBRE_INVERSION"
+        );
+
+        loanResponse = new LoanResponse(
+                new BigDecimal("10.0"),
+                LocalDate.now(),
+                "geoeffrey@arevalo.com",
+                "100688719923243",
+                1L,
+                1L
+        );
+
         loan = Loan.builder()
                 .idLoanState(1L)
                 .idTypeLoan(1L)
@@ -82,9 +106,17 @@ class LoanRouterRestTest {
                 .notificationEmail("geoeffrey@arevalo.com")
                 .build();
 
+        badLoan = Loan.builder()
+                .idLoanState(1L)
+                .idTypeLoan(1L)
+                .amount(new BigDecimal("10.0"))
+                .deadline(LocalDate.now())
+                .userDocument("")
+                .notificationEmail("geoeffrey@arevalo.com")
+                .build();
+
 
     }
-
 
     @Test
     void shouldLoadUserPathPathProperties() {
@@ -100,15 +132,46 @@ class LoanRouterRestTest {
         when( loanUseCase.saveLoan(loan) ).thenReturn(Mono.just(loan));
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
 
+        when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
+        when( loanMapper.createRequestToModel( any( CreateLoanRequest.class ), any() ) ).thenReturn( loan );
+
         webTestClient.post()
                 .uri(LOANS_PATH)
                 .bodyValue(createLoanRequest)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(LoanResponse.class)
-                .value(loanResponse -> {
-                            Assertions.assertThat(loanResponse).isNotNull();
-                        }
-                );
+                .expectBody()
+                .jsonPath("$.success").isEqualTo(true)
+                .jsonPath("$.statusCode").isEqualTo(201)
+                .jsonPath("$.data.userDocument").isEqualTo(loan.getUserDocument())
+                .jsonPath("$.data.notificationEmail")
+                .value( email -> {
+                    Assertions.assertThat(email).isEqualTo(loan.getNotificationEmail());
+                } );
+    }
+
+
+    @Test
+    @DisplayName("Must return error when save a loan.")
+    void testListenSaveUserWithError() {
+
+        when( loanUseCase.saveLoan(any(Loan.class)) ).thenReturn( Mono.just(loan) );
+        when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
+        when( loanMapper.createRequestToModel( any( CreateLoanRequest.class ), any(Long.class) )).thenReturn( badLoan );
+        when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
+
+
+        webTestClient.post()
+                .uri(LOANS_PATH)
+                .bodyValue(createBadLoanRequest)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.success").isEqualTo(false)
+                .jsonPath("$.statusCode").isEqualTo(400)
+                .jsonPath("$.error")
+                .value( error -> {
+                    Assertions.assertThat(error).isNotNull();
+                } );
     }
 }

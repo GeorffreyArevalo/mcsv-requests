@@ -15,7 +15,6 @@ import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class GlobalHandlerException extends AbstractErrorWebExceptionHandler {
@@ -35,7 +34,7 @@ public class GlobalHandlerException extends AbstractErrorWebExceptionHandler {
     private Mono<ServerResponse> renderErrorResponse(ServerRequest request){
 
         Map<String, Object> errorMap = getErrorAttributes(request, ErrorAttributeOptions.defaults());
-        Integer statusCode = Optional.ofNullable(((CustomError) errorMap.get("error")).getStatusCode()).orElse(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        int statusCode = errorMap.get("error") instanceof CustomError customError ? customError.getStatusCode() : (HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ServerResponse.status(statusCode).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(errorMap));
 
     }

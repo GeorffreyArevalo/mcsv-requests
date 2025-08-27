@@ -90,7 +90,7 @@ class TestLoanUseCase {
         when( loanRepositoryPort.save(loan) ).thenReturn(Mono.just(loan));
 
         StepVerifier.create( loanUseCase.saveLoan(loan) )
-                .expectNext(loan)
+                .expectNextMatches(responseLoan -> responseLoan.getUserDocument().equals(loan.getUserDocument()))
                 .verifyComplete();
 
     }

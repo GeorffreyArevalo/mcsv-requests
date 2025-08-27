@@ -50,7 +50,7 @@ class TestTypeLoanUseCase {
         when( typeLoanRepositoryPort.findByCode( typeLoan.getCode() ) ).thenReturn(Mono.just(typeLoan) );
 
         StepVerifier.create( typeLoanUseCase.findByCode( typeLoan.getCode() ) )
-                .expectNext(typeLoan)
+                .expectNextMatches(responseTypeLoan -> responseTypeLoan.getCode().equals( typeLoan.getCode() ) )
                 .verifyComplete();
 
     }

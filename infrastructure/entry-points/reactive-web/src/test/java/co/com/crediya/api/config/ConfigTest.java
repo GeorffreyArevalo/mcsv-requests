@@ -42,15 +42,16 @@ class ConfigTest {
     @MockitoBean
     private TypeLoanUseCase typeLoanUseCase;
 
+
     private final TypeLoan typeLoan = TypeLoan.builder()
             .id(1L)
                 .name("Préstamo de Libre Inversión")
                 .code("LIBRE_INVERSION")
                 .autoValidation(true)
                 .interestRate(new BigDecimal("0.0500"))
-            .maxAmount(new BigDecimal("50000.00"))
-            .minAmount(new BigDecimal("2000.00"))
-            .build();
+                .maxAmount(new BigDecimal("50000.00"))
+                .minAmount(new BigDecimal("2000.00"))
+                .build();
 
     private final CreateLoanRequest createLoanRequest = new CreateLoanRequest(
                 new BigDecimal("10.0"),
@@ -92,7 +93,7 @@ class ConfigTest {
                 .uri("/api/v1/loans")
                 .bodyValue(createLoanRequest)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().valueEquals("Content-Security-Policy",
                         "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
                 .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
