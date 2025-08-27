@@ -49,18 +49,10 @@ public class LoanHandler {
     public Mono<ServerResponse> listenSaveLoan(ServerRequest serverRequest) {
 
         return serverRequest.bodyToMono(CreateLoanRequest.class)
-                .doOnNext( loanRequest -> log.info("Saving loan request={}", loanRequest) )
+                .doOnNext(loanRequest -> log.info("Saving loan request={}", loanRequest))
                 .flatMap( loanRequest -> {
-                    Errors errors = new BeanPropertyBindingResult(loanRequest, CreateLoanRequest.class.getName());
-                    validator.validate(loanRequest, errors);
-
-                    System.out.println("Hay errors: " + errors.hasErrors());
-
-                    if( errors.hasErrors() ) return ServerResponse.badRequest()
-                        .contentType(MediaType.APPLICATION_JSON).bodyValue(HandlersUtil.buildBodyResponse(
-                                false, HttpStatus.BAD_REQUEST.value(), "error", HandlersUtil.getFieldErrors(errors)
-                        ));
-
+                    Errors errors = HandlersUtil.validateRequestsErrors(loanRequest, CreateLoanRequest.class.getName(), validator);
+                    if( errors.hasErrors() ) return HandlersUtil.buildBadRequestResponse(errors);
                     return typeLoanServicePort.findByCode(loanRequest.codeTypeLoan())
                         .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()))
                         .doOnError(throwable -> log.warn("Error saving loan={}", loanRequest))
