@@ -17,7 +17,7 @@ public class LoanRepositoryAdapter extends ReactiveAdapterOperations<
         LoanRepository
 > implements LoanRepositoryPort {
 
-    private final TransactionalOperator transactionalOperator;
+    TransactionalOperator transactionalOperator;
 
     public LoanRepositoryAdapter(LoanRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
         super(repository, mapper, d -> mapper.map(d, Loan.class));
@@ -26,9 +26,7 @@ public class LoanRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<Loan> saveLoan(Loan loan) {
-        return transactionalOperator.execute( tr ->
-                save(loan)
-        ).single();
+        return transactionalOperator.execute( tr -> super.save(loan)).single();
     }
 
 

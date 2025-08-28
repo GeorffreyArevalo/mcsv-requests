@@ -5,9 +5,9 @@ import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.rest.loan.LoanHandler;
 import co.com.crediya.api.rest.loan.LoanRouterRest;
+import co.com.crediya.api.util.ValidatorUtil;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
-import co.com.crediya.ports.TransactionManagementPort;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,12 @@ import java.time.LocalDate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {LoanRouterRest.class, LoanHandler.class, PathsConfig.class})
+@ContextConfiguration(classes = {
+        LoanRouterRest.class,
+        LoanHandler.class,
+        PathsConfig.class,
+        ValidatorUtil.class
+})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class})
 class ConfigTest {
@@ -42,9 +47,6 @@ class ConfigTest {
 
     @MockitoBean
     private TypeLoanUseCase typeLoanUseCase;
-
-    @MockitoBean
-    private TransactionManagementPort transactionManagementPort;
 
 
     private final TypeLoan typeLoan = TypeLoan.builder()
@@ -89,8 +91,6 @@ class ConfigTest {
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
         when( loanMapper.modelToResponse(any()) ).thenReturn(loanResponse);
         when( loanMapper.createRequestToModel(any(), any()) ).thenReturn(loan);
-        when(transactionManagementPort.inTransaction(any(Mono.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
     }
 

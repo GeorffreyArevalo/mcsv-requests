@@ -22,6 +22,7 @@ class ReactiveAdapterOperationsTest {
     private ObjectMapper mapper;
     private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
 
+
     @BeforeEach
     void setUp() {
         repository = Mockito.mock(DummyRepository.class);

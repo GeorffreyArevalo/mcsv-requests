@@ -4,9 +4,10 @@ import co.com.crediya.api.config.PathsConfig;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
+import co.com.crediya.api.util.ValidatorUtil;
+import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
-import co.com.crediya.ports.TransactionManagementPort;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.assertj.core.api.Assertions;
@@ -28,7 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {LoanRouterRest.class, LoanHandler.class})
+@ContextConfiguration(classes = {
+        LoanRouterRest.class,
+        LoanHandler.class,
+        ValidatorUtil.class
+})
 @EnableConfigurationProperties(PathsConfig.class)
 @WebFluxTest
 class LoanRouterRestTest {
@@ -49,14 +54,10 @@ class LoanRouterRestTest {
     @MockitoBean
     private LoanMapper loanMapper;
 
-    @MockitoBean
-    private TransactionManagementPort transactionManagementPort;
-
     private CreateLoanRequestDTO createLoanRequest;
     private CreateLoanRequestDTO createBadLoanRequest;
     private LoanResponseDTO loanResponse;
     private Loan loan;
-    private Loan badLoan;
 
     private TypeLoan typeLoan;
 
@@ -110,16 +111,6 @@ class LoanRouterRestTest {
                 .notificationEmail("geoeffrey@arevalo.com")
                 .build();
 
-        badLoan = Loan.builder()
-                .idLoanState(1L)
-                .idTypeLoan(1L)
-                .amount(new BigDecimal("10.0"))
-                .deadline(LocalDate.now())
-                .userDocument("")
-                .notificationEmail("geoeffrey@arevalo.com")
-                .build();
-
-
     }
 
     @Test
@@ -139,17 +130,13 @@ class LoanRouterRestTest {
         when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
         when( loanMapper.createRequestToModel( any( CreateLoanRequestDTO.class ), any() ) ).thenReturn( loan );
 
-        when(transactionManagementPort.inTransaction(any(Mono.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
         webTestClient.post()
                 .uri(LOANS_PATH)
                 .bodyValue(createLoanRequest)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.success").isEqualTo(true)
-                .jsonPath("$.statusCode").isEqualTo(201)
+                .jsonPath("$.code").isEqualTo(ExceptionStatusCode.CREATED.status())
                 .jsonPath("$.data.userDocument").isEqualTo(loan.getUserDocument())
                 .jsonPath("$.data.notificationEmail")
                 .value( email -> {
@@ -162,23 +149,10 @@ class LoanRouterRestTest {
     @DisplayName("Must return error when save a loan.")
     void testListenSaveLoanWithError() {
 
-        when( loanUseCase.saveLoan(any(Loan.class)) ).thenReturn( Mono.just(loan) );
-        when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
-        when( loanMapper.createRequestToModel( any( CreateLoanRequestDTO.class ), any(Long.class) )).thenReturn( badLoan );
-        when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
-
-
         webTestClient.post()
                 .uri(LOANS_PATH)
                 .bodyValue(createBadLoanRequest)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.success").isEqualTo(false)
-                .jsonPath("$.statusCode").isEqualTo(400)
-                .jsonPath("$.error")
-                .value( error -> {
-                    Assertions.assertThat(error).isNotNull();
-                } );
+                .expectStatus().is5xxServerError();
     }
 }

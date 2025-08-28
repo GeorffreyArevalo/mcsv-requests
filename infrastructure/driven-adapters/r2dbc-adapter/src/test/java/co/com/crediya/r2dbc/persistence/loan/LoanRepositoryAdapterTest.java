@@ -17,9 +17,8 @@ import reactor.test.StepVerifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.mockito.ArgumentMatchers.any;
-
 import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class LoanRepositoryAdapterTest {
@@ -103,6 +102,7 @@ class LoanRepositoryAdapterTest {
     @Test
     @DisplayName("Must save a loan.")
     void mustSaveLoan() {
+
         when(repository.save(loanEntityOne)).thenReturn(Mono.just(loanEntityOne));
         when(mapper.map(loanEntityOne, Loan.class)).thenReturn(loan);
         when(mapper.map(loan, LoanEntity.class)).thenReturn(loanEntityOne);

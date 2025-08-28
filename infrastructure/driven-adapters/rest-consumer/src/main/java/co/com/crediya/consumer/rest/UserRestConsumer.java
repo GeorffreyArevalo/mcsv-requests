@@ -26,6 +26,8 @@ public class UserRestConsumer implements UserServicePort {
                 .uri("/api/v1/users/byDocument/{document}", document)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<UserGenericResponseDTO<UserConsumerResponseDTO>>() {})
-                .map( response -> userConsumerMapper.consumerToModel(response.getData()) );
+                .map(
+                        response -> userConsumerMapper.consumerToModel(response.getData())
+                );
     }
 }

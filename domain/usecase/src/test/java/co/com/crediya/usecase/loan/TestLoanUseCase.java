@@ -83,7 +83,7 @@ class TestLoanUseCase {
 
         when( userConsumerPort.getUserByDocument( loan.getUserDocument() ) ).thenReturn(Mono.just(userConsumer));
         when( loanStateRepositoryPort.findByCode(loanState.getCode()) ).thenReturn(Mono.just(loanState));
-        when( loanRepositoryPort.save(loan) ).thenReturn(Mono.just(loan));
+        when( loanRepositoryPort.saveLoan(loan) ).thenReturn(Mono.just(loan));
 
         StepVerifier.create( loanUseCase.saveLoan(loan) )
                 .expectNextMatches(responseLoan -> responseLoan.getUserDocument().equals(loan.getUserDocument()))
