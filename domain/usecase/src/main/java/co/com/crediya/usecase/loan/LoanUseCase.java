@@ -6,27 +6,24 @@ import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
-import co.com.crediya.port.consumers.UserConsumerPort;
-import co.com.crediya.ports.CrediyaLoggerPort;
+import co.com.crediya.port.consumers.UserServicePort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 
 @RequiredArgsConstructor
-public class LoanUseCase implements LoanServicePort {
+public class LoanUseCase {
 
     private final LoanRepositoryPort loanRepositoryPort;
     private final LoanStateRepositoryPort loanStateRepositoryPort;
-    private final UserConsumerPort userConsumerPort;
-    private final CrediyaLoggerPort logger;
+    private final UserServicePort userServicePort;
 
-    @Override
+
     public Mono<Loan> saveLoan(Loan loan) {
 
         return LoanValidator.validateCreateLoan(loan)
-                .flatMap( validLoan -> userConsumerPort.getUserByDocument(validLoan.getUserDocument())
+                .flatMap( validLoan -> userServicePort.getUserByDocument(validLoan.getUserDocument())
                 .thenReturn(validLoan)
-                .doOnError(e -> logger.warn("User with document {} does not exist", validLoan.getUserDocument()))
                 .onErrorMap( e ->  new CrediyaResourceNotFoundException(
                             String.format( ExceptionMessages.USER_WITH_DOCUMENT_NOT_FOUND.getMessage(), loan.getUserDocument() ))
                 ))
@@ -35,8 +32,7 @@ public class LoanUseCase implements LoanServicePort {
                     currentLoan.setIdLoanState(loanStatus.getId());
                     return currentLoan;
                 }))
-                .flatMap(loanRepositoryPort::save)
-                .doOnSuccess( savedLoan -> logger.info("Loan={} saved successfully.", savedLoan ));
+                .flatMap(loanRepositoryPort::saveLoan);
 
     }
 }

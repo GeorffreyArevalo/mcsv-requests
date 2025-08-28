@@ -1,7 +1,7 @@
 package co.com.crediya.consumer.mappers;
 
-import co.com.crediya.consumer.dtos.user.UserResponse;
-import co.com.crediya.port.consumers.model.UserConsumer;
+import co.com.crediya.consumer.dtos.user.UserConsumerResponseDTO;
+import co.com.crediya.port.consumers.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface UserConsumerMapper {
 
-    UserConsumer toUserConsumer(UserResponse userConsumer);
+    User consumerToModel(UserConsumerResponseDTO userConsumer);
 
 
 }

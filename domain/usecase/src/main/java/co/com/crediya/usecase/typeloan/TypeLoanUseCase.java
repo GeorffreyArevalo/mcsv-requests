@@ -8,11 +8,10 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-public class TypeLoanUseCase implements TypeLoanServicePort {
+public class TypeLoanUseCase {
 
     private final TypeLoanRepositoryPort typeLoanRepositoryPort;
 
-    @Override
     public Mono<TypeLoan> findByCode(String code) {
         return typeLoanRepositoryPort.findByCode(code)
                 .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(

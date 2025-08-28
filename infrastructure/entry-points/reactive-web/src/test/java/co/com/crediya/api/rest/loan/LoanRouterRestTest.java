@@ -1,12 +1,12 @@
 package co.com.crediya.api.rest.loan;
 
 import co.com.crediya.api.config.PathsConfig;
-import co.com.crediya.api.dtos.loan.CreateLoanRequest;
-import co.com.crediya.api.dtos.loan.LoanResponse;
+import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
+import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
-import co.com.crediya.ports.TransactionManagement;
+import co.com.crediya.ports.TransactionManagementPort;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.assertj.core.api.Assertions;
@@ -50,11 +50,11 @@ class LoanRouterRestTest {
     private LoanMapper loanMapper;
 
     @MockitoBean
-    private TransactionManagement transactionManagement;
+    private TransactionManagementPort transactionManagementPort;
 
-    private CreateLoanRequest createLoanRequest;
-    private CreateLoanRequest createBadLoanRequest;
-    private LoanResponse loanResponse;
+    private CreateLoanRequestDTO createLoanRequest;
+    private CreateLoanRequestDTO createBadLoanRequest;
+    private LoanResponseDTO loanResponse;
     private Loan loan;
     private Loan badLoan;
 
@@ -76,7 +76,7 @@ class LoanRouterRestTest {
                 .minAmount(new BigDecimal("2000.00"))
                 .build();
 
-        createLoanRequest = new CreateLoanRequest(
+        createLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
                 "geoeffrey@arevalo.com",
@@ -84,7 +84,7 @@ class LoanRouterRestTest {
                 "LIBRE_INVERSION"
         );
 
-        createBadLoanRequest = new CreateLoanRequest(
+        createBadLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
                 "geoeffrey@arevalo.com",
@@ -92,7 +92,7 @@ class LoanRouterRestTest {
                 "LIBRE_INVERSION"
         );
 
-        loanResponse = new LoanResponse(
+        loanResponse = new LoanResponseDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
                 "geoeffrey@arevalo.com",
@@ -137,9 +137,9 @@ class LoanRouterRestTest {
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
 
         when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
-        when( loanMapper.createRequestToModel( any( CreateLoanRequest.class ), any() ) ).thenReturn( loan );
+        when( loanMapper.createRequestToModel( any( CreateLoanRequestDTO.class ), any() ) ).thenReturn( loan );
 
-        when(transactionManagement.inTransaction(any(Mono.class)))
+        when(transactionManagementPort.inTransaction(any(Mono.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         webTestClient.post()
@@ -160,11 +160,11 @@ class LoanRouterRestTest {
 
     @Test
     @DisplayName("Must return error when save a loan.")
-    void testListenSaveUserWithError() {
+    void testListenSaveLoanWithError() {
 
         when( loanUseCase.saveLoan(any(Loan.class)) ).thenReturn( Mono.just(loan) );
         when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn( loanResponse );
-        when( loanMapper.createRequestToModel( any( CreateLoanRequest.class ), any(Long.class) )).thenReturn( badLoan );
+        when( loanMapper.createRequestToModel( any( CreateLoanRequestDTO.class ), any(Long.class) )).thenReturn( badLoan );
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
 
 

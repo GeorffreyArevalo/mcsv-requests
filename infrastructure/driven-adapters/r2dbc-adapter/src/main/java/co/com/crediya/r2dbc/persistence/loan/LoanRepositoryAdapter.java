@@ -6,6 +6,7 @@ import co.com.crediya.r2dbc.entities.LoanEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -15,14 +16,19 @@ public class LoanRepositoryAdapter extends ReactiveAdapterOperations<
         Long,
         LoanRepository
 > implements LoanRepositoryPort {
-    public LoanRepositoryAdapter(LoanRepository repository, ObjectMapper mapper) {
 
+    private final TransactionalOperator transactionalOperator;
+
+    public LoanRepositoryAdapter(LoanRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
         super(repository, mapper, d -> mapper.map(d, Loan.class));
+        this.transactionalOperator = transactionalOperator;
     }
 
     @Override
-    public Mono<Loan> save(Loan loan) {
-        return super.save(loan);
+    public Mono<Loan> saveLoan(Loan loan) {
+        return transactionalOperator.execute( tr ->
+                save(loan)
+        ).single();
     }
 
 

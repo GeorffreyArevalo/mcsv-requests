@@ -1,12 +1,13 @@
 package co.com.crediya.api.config;
 
-import co.com.crediya.api.dtos.loan.CreateLoanRequest;
-import co.com.crediya.api.dtos.loan.LoanResponse;
+import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
+import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.rest.loan.LoanHandler;
 import co.com.crediya.api.rest.loan.LoanRouterRest;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
+import co.com.crediya.ports.TransactionManagementPort;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +43,9 @@ class ConfigTest {
     @MockitoBean
     private TypeLoanUseCase typeLoanUseCase;
 
+    @MockitoBean
+    private TransactionManagementPort transactionManagementPort;
+
 
     private final TypeLoan typeLoan = TypeLoan.builder()
             .id(1L)
@@ -53,7 +57,7 @@ class ConfigTest {
                 .minAmount(new BigDecimal("2000.00"))
                 .build();
 
-    private final CreateLoanRequest createLoanRequest = new CreateLoanRequest(
+    private final CreateLoanRequestDTO createLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
                         "geoeffrey@arevalo.com",
@@ -61,7 +65,7 @@ class ConfigTest {
                         "LIBRE_INVERSION"
                         );
 
-    private final LoanResponse loanResponse = new LoanResponse(
+    private final LoanResponseDTO loanResponse = new LoanResponseDTO(
             new BigDecimal("10.0"),
             LocalDate.now(),
             "geoeffrey@arevalo.com",
@@ -85,6 +89,9 @@ class ConfigTest {
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
         when( loanMapper.modelToResponse(any()) ).thenReturn(loanResponse);
         when( loanMapper.createRequestToModel(any(), any()) ).thenReturn(loan);
+        when(transactionManagementPort.inTransaction(any(Mono.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
     }
 
     @Test

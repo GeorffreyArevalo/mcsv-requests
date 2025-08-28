@@ -6,9 +6,8 @@ import co.com.crediya.model.Loan;
 import co.com.crediya.model.LoanState;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
-import co.com.crediya.port.consumers.UserConsumerPort;
-import co.com.crediya.port.consumers.model.UserConsumer;
-import co.com.crediya.ports.CrediyaLoggerPort;
+import co.com.crediya.port.consumers.UserServicePort;
+import co.com.crediya.port.consumers.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,13 +30,10 @@ class TestLoanUseCase {
     private LoanRepositoryPort loanRepositoryPort;
 
     @Mock
-    private CrediyaLoggerPort crediyaLoggerPort;
-
-    @Mock
     private LoanStateRepositoryPort loanStateRepositoryPort;
 
     @Mock
-    private UserConsumerPort userConsumerPort;
+    private UserServicePort userConsumerPort;
 
     @InjectMocks
     private LoanUseCase loanUseCase;
@@ -48,7 +44,7 @@ class TestLoanUseCase {
 
     private LoanState loanState;
 
-    private UserConsumer userConsumer;
+    private User userConsumer;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +67,7 @@ class TestLoanUseCase {
 
 
 
-        userConsumer = UserConsumer.builder()
+        userConsumer = User.builder()
                 .name("Julian")
                 .email("julian@gmail.com")
                 .basePayment(new BigDecimal("1.0"))

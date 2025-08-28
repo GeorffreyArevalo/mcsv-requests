@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface LoanRepositoryPort {
 
-    Mono<Loan> save(Loan loan);
+    Mono<Loan> saveLoan(Loan loan);
 
 }

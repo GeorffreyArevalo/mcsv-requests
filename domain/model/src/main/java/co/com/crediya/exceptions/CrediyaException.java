@@ -1,18 +1,18 @@
 package co.com.crediya.exceptions;
 
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
+import lombok.Getter;
 
+@Getter
 public class CrediyaException extends RuntimeException {
 
-    private ExceptionStatusCode statusCode;
+    private final ExceptionStatusCode statusCode;
+    private final int status;
 
-    public CrediyaException(ExceptionStatusCode statusCode, String message ) {
+    public CrediyaException(ExceptionStatusCode statusCode, String message, int status ) {
         super(message);
         this.statusCode = statusCode;
-    }
-
-    public ExceptionStatusCode getStatusCode() {
-        return statusCode;
+        this.status = status;
     }
 
 }
