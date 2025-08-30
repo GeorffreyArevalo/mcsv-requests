@@ -1,8 +1,6 @@
 package co.com.crediya.usecase.loan;
 
 import co.com.crediya.enums.LoanStateCodes;
-import co.com.crediya.exceptions.enums.ExceptionMessages;
-import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
@@ -21,18 +19,12 @@ public class LoanUseCase {
 
     public Mono<Loan> saveLoan(Loan loan) {
 
-        return LoanValidator.validateCreateLoan(loan)
-                .flatMap( validLoan -> userServicePort.getUserByDocument(validLoan.getUserDocument())
-                .thenReturn(validLoan)
-                .onErrorMap( e ->  new CrediyaResourceNotFoundException(
-                            String.format( ExceptionMessages.USER_WITH_DOCUMENT_NOT_FOUND.getMessage(), loan.getUserDocument() ))
-                ))
-                .flatMap( currentLoan ->  loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
+        return userServicePort.getUserByDocument(loan.getUserDocument())
+                .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
                 .map( loanStatus ->  {
-                    currentLoan.setIdLoanState(loanStatus.getId());
-                    return currentLoan;
+                    loan.setIdLoanState(loanStatus.getId());
+                    return loan;
                 }))
                 .flatMap(loanRepositoryPort::saveLoan);
-
     }
 }

@@ -1,7 +1,5 @@
 package co.com.crediya.usecase.loan;
 
-import co.com.crediya.exceptions.CrediyaIllegalArgumentException;
-import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.LoanState;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
@@ -88,49 +86,6 @@ class TestLoanUseCase {
         StepVerifier.create( loanUseCase.saveLoan(loan) )
                 .expectNextMatches(responseLoan -> responseLoan.getUserDocument().equals(loan.getUserDocument()))
                 .verifyComplete();
-
-    }
-
-
-    @Test
-    @DisplayName("Must return error if amount is not valid.")
-    void mustReturnErrorIfAmountIsNotValid() {
-        loan.setAmount(new BigDecimal("-1.0"));
-        StepVerifier.create( loanUseCase.saveLoan(loan) )
-                .expectError( CrediyaIllegalArgumentException.class )
-                .verify();
-
-    }
-
-    @Test
-    @DisplayName("Must return error if deadline is not valid.")
-    void mustReturnErrorIfDeadlineIsNotValid() {
-        loan.setDeadline(LocalDate.of(2024, 11, 10));
-        StepVerifier.create( loanUseCase.saveLoan(loan) )
-                .expectError( CrediyaIllegalArgumentException.class )
-                .verify();
-
-    }
-
-    @Test
-    @DisplayName("Must return error if user document is not valid.")
-    void mustReturnErrorIfUserDocumentIsNotValid() {
-        loan.setUserDocument("");
-        StepVerifier.create( loanUseCase.saveLoan(loan) )
-                .expectError( CrediyaIllegalArgumentException.class )
-                .verify();
-
-    }
-
-    @Test
-    @DisplayName("Must return error if user not exist.")
-    void mustReturnErrorIfUserNotExist() {
-
-        when( userConsumerPort.getUserByDocument(loan.getUserDocument()) ).thenReturn(Mono.error(new CrediyaResourceNotFoundException("")));
-
-        StepVerifier.create( loanUseCase.saveLoan(loan) )
-                .expectError( CrediyaResourceNotFoundException.class )
-                .verify();
 
     }
 

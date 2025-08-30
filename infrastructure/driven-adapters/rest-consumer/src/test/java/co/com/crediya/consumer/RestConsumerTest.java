@@ -1,7 +1,6 @@
 package co.com.crediya.consumer;
 
 
-import co.com.crediya.consumer.dtos.user.UserConsumerResponseDTO;
 import co.com.crediya.consumer.mappers.UserConsumerMapper;
 import co.com.crediya.consumer.rest.UserRestConsumer;
 import co.com.crediya.port.consumers.model.User;
@@ -18,10 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.test.StepVerifier;
 import java.io.IOException;
-
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-
 
 class RestConsumerTest {
 
@@ -53,8 +48,8 @@ class RestConsumerTest {
     }
 
     @Test
-    @DisplayName("Validate the function testGet.")
-    void validateTestGet() {
+    @DisplayName("Must get user by document successfully.")
+    void mustGetUserByDocument() {
         mockBackEnd.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setResponseCode(HttpStatus.OK.value())
@@ -64,6 +59,37 @@ class RestConsumerTest {
         StepVerifier.create(response)
                 .expectNextMatches(userResponse -> userResponse.getDocument().equals(user.getDocument()))
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Must return not found user.")
+    void mustGetUserByDocumentWithError() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setResponseCode(HttpStatus.NOT_FOUND.value())
+                .setBody("{\"message\": \"User not found\" }"));
+
+        var response = restConsumer.getUserByDocument("1");
+
+        StepVerifier.create(response)
+                .expectError()
+                .verify();
+    }
+
+    @Test
+    @DisplayName("Must return internal server error.")
+    void mustGetUserByDocumentWithInternalServerError() {
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .setBody("{\"message\": \"internal server error\" }"));
+
+        var response = restConsumer.getUserByDocument("1");
+
+        StepVerifier.create(response)
+                .expectError()
+                .verify();
     }
 
 }
