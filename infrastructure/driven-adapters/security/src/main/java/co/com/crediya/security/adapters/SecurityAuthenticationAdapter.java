@@ -30,10 +30,7 @@ public class SecurityAuthenticationAdapter implements SecurityAuthenticationPort
                 .map(SecurityContext::getAuthentication)
                 .filter( JwtAuthenticationToken.class::isInstance )
                 .map( JwtAuthenticationToken.class::cast )
-                .map( jwtAuthenticationToken -> {
-                    log.info( "Getting authentication token {}", jwtAuthenticationToken.getToken() );
-                    return jwtAuthenticationToken.getToken();
-                } );
+                .map( JwtAuthenticationToken::getToken );
     }
 
 

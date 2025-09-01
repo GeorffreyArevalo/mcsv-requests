@@ -2,6 +2,7 @@ package co.com.crediya.consumer.rest;
 
 import co.com.crediya.consumer.dtos.user.UserConsumerResponseDTO;
 import co.com.crediya.consumer.dtos.user.UserGenericResponseDTO;
+import co.com.crediya.consumer.enums.WebClientSecurityConstants;
 import co.com.crediya.consumer.mappers.UserConsumerMapper;
 import co.com.crediya.exceptions.CrediyaException;
 import co.com.crediya.exceptions.CrediyaInternalServerErrorException;
@@ -31,7 +32,6 @@ public class UserRestConsumer implements UserServicePort {
 
     @CircuitBreaker(name = "getUserByDocument")
     public Mono<User> getUserByDocument(String document) {
-        log.info("Getting user by document {}", document);
         return securityAuthenticationPort.getCurrentContextToken()
             .switchIfEmpty(
                 Mono.error( new CrediyaInternalServerErrorException(ExceptionMessages.INTERNAL_SERVER_ERROR_GET_TOKEN.getMessage()))
@@ -39,7 +39,7 @@ public class UserRestConsumer implements UserServicePort {
             .flatMap( token -> client
                 .get()
                 .uri("/api/v1/users/byDocument/{document}", document)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header(HttpHeaders.AUTHORIZATION, WebClientSecurityConstants.TYPE_TOKEN.getValue() + token)
                 .retrieve()
                 .onStatus( HttpStatusCode::is4xxClientError, response -> response.bodyToMono( UserGenericResponseDTO.class )
                     .flatMap( error ->
