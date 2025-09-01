@@ -66,3 +66,7 @@ springdoc:
     path: /openapi/v3/api-docs
   packages-to-scan: co.com.crediya
   paths-to-match: /**
+
+security:
+  jwt:
+    public-key-location: classpath:key/request-public.pem

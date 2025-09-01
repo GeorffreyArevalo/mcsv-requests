@@ -1,10 +1,13 @@
 package co.com.crediya.usecase.loan;
 
 import co.com.crediya.enums.LoanStateCodes;
+import co.com.crediya.exceptions.CrediyaForbiddenException;
+import co.com.crediya.exceptions.enums.ExceptionMessages;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
+import co.com.crediya.port.token.SecurityAuthenticationPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,11 +18,17 @@ public class LoanUseCase {
     private final LoanRepositoryPort loanRepositoryPort;
     private final LoanStateRepositoryPort loanStateRepositoryPort;
     private final UserServicePort userServicePort;
+    private final SecurityAuthenticationPort securityAuthenticationPort;
 
 
     public Mono<Loan> saveLoan(Loan loan) {
 
         return userServicePort.getUserByDocument(loan.getUserDocument())
+                .flatMap( user ->
+                    securityAuthenticationPort.getTokenSubject()
+                            .filter( userEmail -> userEmail.equals(user.getEmail()) )
+                )
+                .switchIfEmpty( Mono.error(new CrediyaForbiddenException(ExceptionMessages.CREATE_LOAN_FORBIDDEN.getMessage())) )
                 .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
                 .map( loanStatus ->  {
                     loan.setIdLoanState(loanStatus.getId());
