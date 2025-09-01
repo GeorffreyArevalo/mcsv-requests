@@ -41,7 +41,9 @@ public class LoanHandler {
             requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = CreateLoanRequestDTO.class ) ) ),
             responses = { @ApiResponse( responseCode = "201", description = "Loan saved successfully.", content = @Content( schema = @Schema( implementation = LoanResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "400", description = "Request body is not valid.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
-                    @ApiResponse( responseCode = "404", description = "User document sent is not found.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
+                    @ApiResponse( responseCode = "404", description = "User document sent is not found.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
+                    @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
+                    @ApiResponse( responseCode = "403", description = "Access Denied.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
             }
     )
     public Mono<ServerResponse> listenSaveLoan(ServerRequest serverRequest) {

@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
+@EnableWebFluxSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -24,7 +26,13 @@ public class SecurityConfig {
         return http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange( exchanges ->
-                    exchanges.pathMatchers( HttpMethod.POST, "/api/v1/loans" ).hasAuthority("SCOPE_CLIENT")
+                    exchanges
+                            .pathMatchers(
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui.html",
+                                    "/swagger-ui/**"
+                            ).permitAll()
+                            .pathMatchers( HttpMethod.POST, "/api/v1/loans" ).hasAuthority("SCOPE_CLIENT")
                             .anyExchange().authenticated()
             )
             .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)

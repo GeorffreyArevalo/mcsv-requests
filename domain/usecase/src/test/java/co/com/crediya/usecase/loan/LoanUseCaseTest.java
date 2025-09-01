@@ -6,6 +6,7 @@ import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
 import co.com.crediya.port.consumers.model.User;
+import co.com.crediya.port.token.SecurityAuthenticationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,13 +23,16 @@ import java.time.LocalDate;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TestLoanUseCase {
+class LoanUseCaseTest {
 
     @Mock
     private LoanRepositoryPort loanRepositoryPort;
 
     @Mock
     private LoanStateRepositoryPort loanStateRepositoryPort;
+
+    @Mock
+    private SecurityAuthenticationPort securityAuthenticationPort;
 
     @Mock
     private UserServicePort userConsumerPort;
@@ -82,6 +86,7 @@ class TestLoanUseCase {
         when( userConsumerPort.getUserByDocument( loan.getUserDocument() ) ).thenReturn(Mono.just(userConsumer));
         when( loanStateRepositoryPort.findByCode(loanState.getCode()) ).thenReturn(Mono.just(loanState));
         when( loanRepositoryPort.saveLoan(loan) ).thenReturn(Mono.just(loan));
+        when( securityAuthenticationPort.getTokenSubject() ).thenReturn(Mono.just(userConsumer.getEmail()));
 
         StepVerifier.create( loanUseCase.saveLoan(loan) )
                 .expectNextMatches(responseLoan -> responseLoan.getUserDocument().equals(loan.getUserDocument()))

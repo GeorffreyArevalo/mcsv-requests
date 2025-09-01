@@ -23,7 +23,7 @@ public class LoanRouterRest {
 
     @Bean
     @RouterOperations({
-            @RouterOperation(path = "/api/v1/loans", produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.POST, beanClass = LoanHandler.class, beanMethod = "listenSaveLoan")
+            @RouterOperation(path = "/api/v1/loans", headers = {"Authorization"}, produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.POST, beanClass = LoanHandler.class, beanMethod = "listenSaveLoan")
     })
     public RouterFunction<ServerResponse> routerFunction(LoanHandler handler) {
         return route(POST(pathsConfig.getLoans()), handler::listenSaveLoan);

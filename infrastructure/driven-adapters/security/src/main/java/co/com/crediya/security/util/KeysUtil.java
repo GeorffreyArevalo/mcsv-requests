@@ -1,8 +1,8 @@
 package co.com.crediya.security.util;
 
 import co.com.crediya.security.enums.SecurityConstants;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,10 @@ import java.util.Base64;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class KeysUtil {
 
-    @Value("${security.jwt.public-key-location}")
-    private Resource resourcePublicKey;
+    private final Resource resourcePublicKey;
 
     public RSAPublicKey loadPublicKey() {
         try {
