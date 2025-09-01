@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum ExceptionMessages {
 
     WEB_CLIENT_INTERNAL_SERVER_ERROR("Internal server error in user server."),
-    CREATE_LOAN_FORBIDDEN("Don't create loan for other client."),
+    CREATE_LOAN_FORBIDDEN("Can't create a loan for other client."),
     INTERNAL_SERVER_ERROR_GET_TOKEN("An error occurred while getting the token."),
     TYPE_LOAN_WITH_CODE_NOT_FOUND("Type loan with code %s not found.");
 
