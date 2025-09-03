@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -26,6 +27,7 @@ public class LoanRouterRest {
             @RouterOperation(path = "/api/v1/loans", headers = {"Authorization"}, produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.POST, beanClass = LoanHandler.class, beanMethod = "listenSaveLoan")
     })
     public RouterFunction<ServerResponse> routerFunction(LoanHandler handler) {
-        return route(POST(pathsConfig.getLoans()), handler::listenSaveLoan);
+        return route(POST(pathsConfig.getLoans()), handler::listenSaveLoan)
+                .andRoute( GET( pathsConfig.getLoans()), handler::listenFindPageableLoans );
     }
 }

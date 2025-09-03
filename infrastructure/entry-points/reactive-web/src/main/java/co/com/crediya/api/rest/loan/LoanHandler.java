@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -49,21 +50,34 @@ public class LoanHandler {
     public Mono<ServerResponse> listenSaveLoan(ServerRequest serverRequest) {
 
         return serverRequest.bodyToMono(CreateLoanRequestDTO.class)
-                .doOnNext(loanRequest -> log.info("Saving loan request={}", loanRequest))
-                .flatMap( validatorUtil::validate )
-                .flatMap( loanRequest ->
-                        typeLoanUseCase.findByCode(loanRequest.codeTypeLoan())
-                                .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()) )
-                )
-                .flatMap( loanUseCase::saveLoan )
-                .map( loanMapper::modelToResponse )
-                .flatMap( savedLoan ->
-                        ServerResponse.created(URI.create(""))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue(HandlersResponseUtil.buildBodySuccessResponse(ExceptionStatusCode.CREATED.status(), savedLoan) )
-                );
-
-
-
+            .doOnNext(loanRequest -> log.info("Saving loan request={}", loanRequest))
+            .flatMap( validatorUtil::validate )
+            .flatMap( loanRequest ->
+                typeLoanUseCase.findByCode(loanRequest.codeTypeLoan())
+                    .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()) )
+            )
+            .flatMap( loanUseCase::saveLoan )
+            .map( loanMapper::modelToResponse )
+            .flatMap( savedLoan ->
+                ServerResponse.created(URI.create(""))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(HandlersResponseUtil.buildBodySuccessResponse(ExceptionStatusCode.CREATED.status(), savedLoan) )
+            );
     }
+
+    public Mono<ServerResponse> listenFindPageableLoans(ServerRequest serverRequest) {
+        return loanUseCase.findPageLoans(
+                    serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10),
+                    serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0)
+                )
+                .flatMap(loans ->
+                    ServerResponse.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(
+                        HandlersResponseUtil.buildBodySuccessPageableResponse(
+                            ExceptionStatusCode.OK.status(), loans
+                        )
+                    ));
+    }
+
 }

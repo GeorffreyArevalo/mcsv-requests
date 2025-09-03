@@ -10,4 +10,6 @@ public interface LoanRepositoryPort {
 
     Flux<Loan> findLoans(int size, int page);
 
+    Mono<Long>  count();
+
 }

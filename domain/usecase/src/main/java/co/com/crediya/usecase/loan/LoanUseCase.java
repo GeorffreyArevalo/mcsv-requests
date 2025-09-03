@@ -4,6 +4,7 @@ import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.CrediyaForbiddenException;
 import co.com.crediya.exceptions.enums.ExceptionMessages;
 import co.com.crediya.model.Loan;
+import co.com.crediya.model.Pageable;
 import co.com.crediya.model.gateways.LoanRepositoryPort;
 import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
@@ -37,8 +38,18 @@ public class LoanUseCase {
             .flatMap(loanRepositoryPort::saveLoan);
     }
 
-    public Flux<Loan> findPageLoans( int size, int page ) {
+    public Mono<Pageable<Loan>> findPageLoans(int size, int page ) {
 
-        return loanRepositoryPort.findLoans(page, size);
+        return loanRepositoryPort.findLoans(size, (page * size))
+                .collectList()
+                .zipWith( loanRepositoryPort.count(), ( loans, count ) ->
+                    Pageable
+                        .<Loan>builder()
+                        .page(page)
+                        .total(count)
+                        .size(size)
+                        .content(loans)
+                        .build()
+                );
     }
 }

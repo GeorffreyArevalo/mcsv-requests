@@ -35,4 +35,9 @@ public class LoanRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.findLoans(size, page).map(super::toEntity);
     }
 
+    @Override
+    public Mono<Long> count() {
+        return repository.count();
+    }
+
 }
