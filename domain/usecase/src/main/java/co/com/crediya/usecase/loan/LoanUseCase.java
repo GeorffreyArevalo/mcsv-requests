@@ -25,8 +25,8 @@ public class LoanUseCase {
 
         return userServicePort.getUserByDocument(loan.getUserDocument())
                 .flatMap( user ->
-                    securityAuthenticationPort.getTokenSubject()
-                            .filter( userEmail -> userEmail.equals(user.getEmail()) )
+                    securityAuthenticationPort.getCurrentContextToken()
+                        .filter( token -> token.getSubject().equals(user.getEmail()) )
                 )
                 .switchIfEmpty( Mono.error(new CrediyaForbiddenException(ExceptionMessages.CREATE_LOAN_FORBIDDEN.getMessage())) )
                 .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())

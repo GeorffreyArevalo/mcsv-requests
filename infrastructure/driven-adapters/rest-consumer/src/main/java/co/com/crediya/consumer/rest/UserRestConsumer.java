@@ -2,7 +2,6 @@ package co.com.crediya.consumer.rest;
 
 import co.com.crediya.consumer.dtos.user.UserConsumerResponseDTO;
 import co.com.crediya.consumer.dtos.user.UserGenericResponseDTO;
-import co.com.crediya.consumer.enums.WebClientSecurityConstants;
 import co.com.crediya.consumer.mappers.UserConsumerMapper;
 import co.com.crediya.exceptions.CrediyaException;
 import co.com.crediya.exceptions.CrediyaInternalServerErrorException;
@@ -39,7 +38,7 @@ public class UserRestConsumer implements UserServicePort {
             .flatMap( token -> client
                 .get()
                 .uri("/api/v1/users/byDocument/{document}", document)
-                .header(HttpHeaders.AUTHORIZATION, WebClientSecurityConstants.TYPE_TOKEN.getValue() + token)
+                .header(HttpHeaders.AUTHORIZATION, token.getAccessToken())
                 .retrieve()
                 .onStatus( HttpStatusCode::is4xxClientError, response -> response.bodyToMono( UserGenericResponseDTO.class )
                     .flatMap( error ->
