@@ -9,6 +9,7 @@ import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
 import co.com.crediya.port.token.SecurityAuthenticationPort;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -22,18 +23,22 @@ public class LoanUseCase {
 
 
     public Mono<Loan> saveLoan(Loan loan) {
-
         return userServicePort.getUserByDocument(loan.getUserDocument())
-                .flatMap( user ->
-                    securityAuthenticationPort.getCurrentContextToken()
-                        .filter( token -> token.getSubject().equals(user.getEmail()) )
-                )
-                .switchIfEmpty( Mono.error(new CrediyaForbiddenException(ExceptionMessages.CREATE_LOAN_FORBIDDEN.getMessage())) )
-                .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
-                .map( loanStatus ->  {
-                    loan.setIdLoanState(loanStatus.getId());
-                    return loan;
-                }))
-                .flatMap(loanRepositoryPort::saveLoan);
+            .flatMap( user ->
+                securityAuthenticationPort.getCurrentContextToken()
+                    .filter( token -> token.getSubject().equals(user.getEmail()) )
+            )
+            .switchIfEmpty( Mono.error(new CrediyaForbiddenException(ExceptionMessages.CREATE_LOAN_FORBIDDEN.getMessage())) )
+            .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
+            .map( loanStatus ->  {
+                loan.setIdLoanState(loanStatus.getId());
+                return loan;
+            }))
+            .flatMap(loanRepositoryPort::saveLoan);
+    }
+
+    public Flux<Loan> findPageLoans( int size, int page ) {
+
+        return loanRepositoryPort.findLoans(page, size);
     }
 }
