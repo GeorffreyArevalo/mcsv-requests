@@ -11,6 +11,9 @@ import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -46,6 +49,9 @@ public class LoanHandler {
                     @ApiResponse( responseCode = "404", description = "User document sent is not found.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "403", description = "Access Denied.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
+            },
+            parameters = {
+                    @Parameter( in = ParameterIn.HEADER, name = "Authorization", description = "Bearer token", required = true, example = "mkasjdlkjas782347812" )
             }
     )
     public Mono<ServerResponse> listenSaveLoan(ServerRequest serverRequest) {
@@ -66,6 +72,19 @@ public class LoanHandler {
             );
     }
 
+    @Operation( tags = "Loans", operationId = "findPageableLoans", description = "Find loans with pagination", summary = "Find loans with pagination",
+            requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = CreateLoanRequestDTO.class ) ) ),
+            parameters = {
+                @Parameter( in = ParameterIn.QUERY, name = "size", description = "Size pagination", required = true, example = "10" ),
+                @Parameter( in = ParameterIn.QUERY, name = "page", description = "Number of page", required = true, example = "1" ),
+                @Parameter( in = ParameterIn.QUERY, name = "state", description = "State of loan", required = true, example = "APROBADO" ),
+                @Parameter( in = ParameterIn.HEADER, name = "Authorization", description = "Bearer token", required = true, example = "mkasjdlkjas782347812" ),
+            },
+            responses = { @ApiResponse( responseCode = "201", description = "Loans found successfully.", content = @Content( array = @ArraySchema( schema = @Schema( implementation = LoanResponseDTO.class ) ) ) ),
+                    @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
+                    @ApiResponse( responseCode = "403", description = "Access Denied.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
+            }
+    )
     public Mono<ServerResponse> listenFindPageableLoans(ServerRequest serverRequest) {
         int size =serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10);
         int page = serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0);

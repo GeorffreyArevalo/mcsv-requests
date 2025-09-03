@@ -5,6 +5,7 @@ import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.util.ValidatorUtil;
+import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.TypeLoan;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -147,6 +149,23 @@ class LoanRouterRestTest {
                 .value( email -> {
                     Assertions.assertThat(email).isEqualTo(loan.getNotificationEmail());
                 } );
+    }
+
+    @Test
+    @DisplayName("listenFindPageableLoans debe retornar préstamos paginados con 200")
+    void listenFindPageableLoans_shouldReturnPagedLoans() {
+
+        when(loanUseCase.findPageLoans(10, 0, LoanStateCodes.APPROVED.getStatus()))
+                .thenReturn(Flux.just(loan));
+        when(loanMapper.modelToResponse(loan)).thenReturn(loanResponse);
+        when(loanUseCase.countLoans()).thenReturn(Mono.just(1L));
+
+        webTestClient.get()
+                .uri(LOANS_PATH )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.code").isEqualTo(ExceptionStatusCode.OK.status());
     }
 
 

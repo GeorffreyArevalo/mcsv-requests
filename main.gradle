@@ -99,7 +99,8 @@ tasks.register('jacocoMergedReport', JacocoReport) {
             files(subprojects.sourceSets.main.output).collect {
                 fileTree(dir: it, exclude: [
                         '**/co/com/crediya/security/config/**',
-                        '**/co/com/crediya/security/exceptions/handler/**'
+                        '**/co/com/crediya/security/exceptions/handler/**',
+                        '**/co/com/crediya/api/config/**'
                 ])
             }
     )
