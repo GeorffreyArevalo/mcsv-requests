@@ -8,7 +8,7 @@ public interface LoanRepositoryPort {
 
     Mono<Loan> saveLoan(Loan loan);
 
-    Flux<Loan> findLoans(int size, int page);
+    Flux<Loan> findLoans(int size, int page, Long idState);
 
     Mono<Long>  count();
 

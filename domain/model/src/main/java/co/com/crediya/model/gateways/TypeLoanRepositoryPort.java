@@ -6,5 +6,7 @@ import reactor.core.publisher.Mono;
 public interface TypeLoanRepositoryPort {
 
     Mono<TypeLoan> findByCode(String code);
+    Mono<TypeLoan> findById(Long id);
+
 
 }

@@ -7,6 +7,7 @@ import co.com.crediya.exceptions.CrediyaException;
 import co.com.crediya.exceptions.CrediyaInternalServerErrorException;
 import co.com.crediya.exceptions.enums.ExceptionMessages;
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
+import co.com.crediya.model.Token;
 import co.com.crediya.port.consumers.model.User;
 import co.com.crediya.port.token.SecurityAuthenticationPort;
 import okhttp3.mockwebserver.MockResponse;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -28,6 +30,8 @@ class RestConsumerTest {
     private UserConsumerMapper userConsumerMapper;
     private SecurityAuthenticationPort securityAuthenticationPort;
     private UserRestConsumer userRestConsumer;
+
+    private Token token;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -42,6 +46,13 @@ class RestConsumerTest {
         securityAuthenticationPort = Mockito.mock(SecurityAuthenticationPort.class);
 
         userRestConsumer = new UserRestConsumer(webClient, userConsumerMapper, securityAuthenticationPort);
+
+        token = Token.builder()
+                .accessToken("21313")
+                .subject("garevalo@gmail.com")
+                .role("ADMIN")
+                .permissions(List.of())
+                .build();
     }
 
     @AfterEach
@@ -51,7 +62,6 @@ class RestConsumerTest {
 
     @Test
     void getUserByDocument_withValidToken_shouldReturnUser() {
-        String token = "valid-token";
         String document = "123";
 
         User user = new User();
@@ -93,7 +103,6 @@ class RestConsumerTest {
     @Test
     void getUserByDocumentWithNotFoundResponseShouldThrowCrediyaException() {
 
-        String token = "valid-token";
         String document = "123";
 
         when(securityAuthenticationPort.getCurrentContextToken()).thenReturn(Mono.just(token));
@@ -116,7 +125,6 @@ class RestConsumerTest {
     @Test
     void getUserByDocumentWithInternalServerErrorShouldThrowCrediyaException() {
 
-        String token = "valid-token";
         String document = "123";
 
         when(securityAuthenticationPort.getCurrentContextToken()).thenReturn(Mono.just(token));

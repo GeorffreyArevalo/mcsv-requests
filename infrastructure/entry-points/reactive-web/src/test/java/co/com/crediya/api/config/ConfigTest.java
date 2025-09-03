@@ -7,7 +7,9 @@ import co.com.crediya.api.rest.loan.LoanHandler;
 import co.com.crediya.api.rest.loan.LoanRouterRest;
 import co.com.crediya.api.util.ValidatorUtil;
 import co.com.crediya.model.Loan;
+import co.com.crediya.model.Token;
 import co.com.crediya.model.TypeLoan;
+import co.com.crediya.usecase.auth.AuthUseCase;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -41,6 +44,9 @@ class ConfigTest {
 
     @MockitoBean
     private LoanUseCase loanUseCase;
+
+    @MockitoBean
+    private AuthUseCase authUseCase;
 
     @MockitoBean
     private LoanMapper loanMapper;
@@ -73,7 +79,12 @@ class ConfigTest {
             "geoeffrey@arevalo.com",
             "100688719923243",
             1L,
-            1L
+            1L,
+            "APROVADA",
+            "MIN",
+            BigDecimal.TEN,
+            "Juan",
+            new BigDecimal("0.05")
     );
 
     private final Loan loan = Loan.builder()
@@ -85,12 +96,22 @@ class ConfigTest {
                 .notificationEmail("geoeffrey@arevalo.com")
                 .build();
 
+    private final Token token = Token.builder()
+            .accessToken("21313")
+            .subject("julian@gmail.com")
+            .role("ADMIN")
+            .permissions(List.of())
+            .build();
+
+    private final String bearerToken = "Bearer valid-token";
+
     @BeforeEach
     void setUp() {
         when( loanUseCase.saveLoan(loan) ).thenReturn(Mono.just(loan));
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
         when( loanMapper.modelToResponse(any()) ).thenReturn(loanResponse);
         when( loanMapper.createRequestToModel(any(), any()) ).thenReturn(loan);
+        when( authUseCase.authorize(bearerToken, "POST", "/api/v1/loans") ).thenReturn( Mono.just(token) );
 
     }
 
@@ -98,6 +119,7 @@ class ConfigTest {
     void corsConfigurationShouldAllowOrigins() {
         webTestClient.post()
                 .uri("/api/v1/loans")
+                .header("Authorization", bearerToken)
                 .bodyValue(createLoanRequest)
                 .exchange()
                 .expectStatus().isCreated()

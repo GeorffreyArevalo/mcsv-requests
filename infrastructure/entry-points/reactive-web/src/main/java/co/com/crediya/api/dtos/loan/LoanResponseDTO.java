@@ -9,6 +9,12 @@ public record LoanResponseDTO(
         String notificationEmail,
         String userDocument,
         Long idLoanState,
-        Long idTypeLoan
+        Long idTypeLoan,
+
+        String state,
+        String type,
+        BigDecimal basePayment,
+        String nameClient,
+        BigDecimal interestRate
 ) {
 }

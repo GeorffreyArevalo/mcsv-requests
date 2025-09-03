@@ -2,7 +2,6 @@ package co.com.crediya.api.util;
 
 import co.com.crediya.api.dtos.CrediyaResponseDTO;
 import co.com.crediya.api.dtos.PageableResponseDTO;
-import co.com.crediya.model.Pageable;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -32,15 +31,17 @@ public class HandlersResponseUtil {
                 .build();
     }
 
-    public static <T> PageableResponseDTO<T> buildBodySuccessPageableResponse(String code, Pageable<T> data ) {
+    public static <T> PageableResponseDTO<T> buildBodySuccessPageableResponse(
+            String code, List<T> data, int size, int page, long total
+    ) {
         return PageableResponseDTO
                 .<T>builder()
                 .message("Operation successful!")
-                .data(data.getContent())
-                .page(data.getPage())
-                .size(data.getSize())
-                .total(data.getTotal())
+                .data(data)
+                .page(page)
+                .size(size)
                 .code(code)
+                .total(total)
                 .timestamp(LocalDateTime.now())
                 .build();
     }

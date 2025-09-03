@@ -99,7 +99,12 @@ class LoanRouterRestTest {
                 "geoeffrey@arevalo.com",
                 "100688719923243",
                 1L,
-                1L
+                1L,
+                "APROVADA",
+                "MIN",
+                BigDecimal.TEN,
+                "Juan",
+                new BigDecimal("0.05")
         );
 
         loan = Loan.builder()

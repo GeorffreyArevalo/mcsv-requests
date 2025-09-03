@@ -22,5 +22,10 @@ public class Loan {
     private Long idLoanState;
     private Long idTypeLoan;
 
+    private String state;
+    private String type;
+    private BigDecimal basePayment;
+    private String nameClient;
+    private BigDecimal interestRate;
 
 }

@@ -6,6 +6,7 @@ import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.util.HandlersResponseUtil;
 import co.com.crediya.api.util.ValidatorUtil;
+import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
@@ -66,18 +67,23 @@ public class LoanHandler {
     }
 
     public Mono<ServerResponse> listenFindPageableLoans(ServerRequest serverRequest) {
+        int size =serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10);
+        int page = serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0);
         return loanUseCase.findPageLoans(
-                    serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10),
-                    serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0)
+                    size, page,
+                    serverRequest.queryParam("state").map( String::toString ).orElse(LoanStateCodes.APPROVED.getStatus())
                 )
-                .flatMap(loans ->
-                    ServerResponse.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(
-                        HandlersResponseUtil.buildBodySuccessPageableResponse(
-                            ExceptionStatusCode.OK.status(), loans
-                        )
-                    ));
+                .map( loanMapper::modelToResponse )
+                .collectList()
+                .zipWith( loanUseCase.countLoans(), (loans, count) ->
+                    HandlersResponseUtil.buildBodySuccessPageableResponse(
+                            ExceptionStatusCode.OK.status(), loans, size, page, count
+                    )
+                ).flatMap( response ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue( response)
+                );
     }
 
 }

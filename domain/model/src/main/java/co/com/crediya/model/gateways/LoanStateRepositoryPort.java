@@ -8,4 +8,6 @@ public interface LoanStateRepositoryPort {
 
     Mono<LoanState> findByCode(String code);
 
+    Mono<LoanState> findById(Long id);
+
 }
