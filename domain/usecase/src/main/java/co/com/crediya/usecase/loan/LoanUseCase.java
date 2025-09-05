@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 
 @RequiredArgsConstructor
 public class LoanUseCase {
@@ -43,19 +45,19 @@ public class LoanUseCase {
             .flatMap(loanRepositoryPort::saveLoan);
     }
 
+
+
     public Flux<Loan> findPageLoans(int size, int page, String codeState ) {
 
         return loanStateRepositoryPort.findByCode(codeState)
             .switchIfEmpty( Mono.error( new CrediyaResourceNotFoundException(
                 String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
             )) )
-            .flatMapMany( loanState -> loanRepositoryPort.findLoans(size, page, loanState.getId())
-
-            ).flatMap( loan ->  {
+            .flatMapMany( loanState -> loanRepositoryPort.findLoans(size, page, loanState.getId()))
+            .flatMap( loan ->  {
                 Mono<TypeLoan> monoTypeLoan = typeLoanRepositoryPort.findById(loan.getIdTypeLoan());
                 Mono<LoanState> monoStateLoan = loanStateRepositoryPort.findById(loan.getIdLoanState());
                 Mono<User> monoUser = userServicePort.getUserByDocument(loan.getUserDocument());
-
                 return Mono.zip(monoTypeLoan, monoStateLoan, (type, state) -> {
                     loan.setState(state.getName());
                     loan.setType(type.getName());
@@ -63,6 +65,7 @@ public class LoanUseCase {
                     return loan;
                 }).zipWith( monoUser, ( fullLoan, user ) -> {
                     fullLoan.setBasePayment(user.getBasePayment());
+                    fullLoan.setMonthlyFee(BigDecimal.ZERO); // Realizar el calculo
                     fullLoan.setNameClient(user.getName());
                     return fullLoan;
                 });

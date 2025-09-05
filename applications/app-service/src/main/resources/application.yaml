@@ -61,11 +61,13 @@ routes:
 
 springdoc:
   swagger-ui:
-    path: /openapi/swagger-ui.html
+    path: /openapi/swagger-ui
   api-docs:
     path: /openapi/v3/api-docs
-  packages-to-scan: co.com.crediya
-  paths-to-match: /**
+  packages-to-scan:
+    - co.com.crediya
+  paths-to-match:
+    - /**
 
 security:
   jwt:

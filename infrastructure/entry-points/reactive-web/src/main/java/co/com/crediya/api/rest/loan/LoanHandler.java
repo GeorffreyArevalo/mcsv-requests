@@ -87,7 +87,7 @@ public class LoanHandler {
     )
     public Mono<ServerResponse> listenFindPageableLoans(ServerRequest serverRequest) {
         int size =serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10);
-        int page = serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0);
+        int page = serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0); // Default con jakrta
         return loanUseCase.findPageLoans(
                     size, page,
                     serverRequest.queryParam("state").map( String::toString ).orElse(LoanStateCodes.APPROVED.getStatus())

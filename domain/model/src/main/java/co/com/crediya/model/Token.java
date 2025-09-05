@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +14,5 @@ public class Token {
     private String accessToken;
     private String role;
     private String subject;
-    private List<String> permissions;
 
 }

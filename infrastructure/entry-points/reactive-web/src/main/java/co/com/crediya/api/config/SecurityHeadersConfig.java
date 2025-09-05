@@ -18,6 +18,8 @@ public class SecurityHeadersConfig implements WebFilter {
 
     private final AuthUseCase authUseCase;
 
+    // Consultar roles de bd
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();

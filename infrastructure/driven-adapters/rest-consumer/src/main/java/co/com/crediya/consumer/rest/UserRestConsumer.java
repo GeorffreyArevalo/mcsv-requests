@@ -58,4 +58,20 @@ public class UserRestConsumer implements UserServicePort {
                 )
             );
     }
+
+    @Override
+    public Mono<Boolean> roleHasPermissionToPath(String roleCode, String path, String method, String token) {
+        return client.get()
+                .uri( uriBuilder ->
+                    uriBuilder.path("/api/v1/auth/roleHasPermission")
+                            .queryParam("roleCode", roleCode)
+                            .queryParam("path", path)
+                            .queryParam("method", method)
+                            .build()
+                )
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .retrieve()
+                .bodyToMono( new ParameterizedTypeReference<UserGenericResponseDTO<Boolean>>() {} )
+                .map(UserGenericResponseDTO::getData);
+    }
 }

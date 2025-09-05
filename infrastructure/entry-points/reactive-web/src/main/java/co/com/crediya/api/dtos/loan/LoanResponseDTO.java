@@ -15,6 +15,7 @@ public record LoanResponseDTO(
         String type,
         BigDecimal basePayment,
         String nameClient,
-        BigDecimal interestRate
+        BigDecimal interestRate,
+        BigDecimal monthlyFee
 ) {
 }

@@ -7,4 +7,6 @@ public interface UserServicePort {
 
     Mono<User> getUserByDocument(String document );
 
+    Mono<Boolean> roleHasPermissionToPath( String roleCode, String path, String method, String token );
+
 }
