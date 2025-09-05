@@ -4,6 +4,7 @@ import co.com.crediya.api.dtos.CrediyaResponseDTO;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.mappers.LoanMapper;
+import co.com.crediya.api.mappers.SearchParamsMapper;
 import co.com.crediya.api.util.HandlersResponseUtil;
 import co.com.crediya.api.util.ValidatorUtil;
 import co.com.crediya.enums.LoanStateCodes;
@@ -39,6 +40,7 @@ public class LoanHandler {
 
     private final ValidatorUtil validatorUtil;
     private final LoanMapper loanMapper;
+    private final SearchParamsMapper searchParamsMapper;
 
 
 
@@ -86,23 +88,23 @@ public class LoanHandler {
             }
     )
     public Mono<ServerResponse> listenFindPageableLoans(ServerRequest serverRequest) {
-        int size =serverRequest.queryParam("size").map( Integer::parseInt ).orElse(10);
-        int page = serverRequest.queryParam("page").map( Integer::parseInt ).orElse(0); // Default con jakrta
-        return loanUseCase.findPageLoans(
-                    size, page,
-                    serverRequest.queryParam("state").map( String::toString ).orElse(LoanStateCodes.APPROVED.getStatus())
-                )
-                .map( loanMapper::modelToResponse )
-                .collectList()
-                .zipWith( loanUseCase.countLoans(), (loans, count) ->
-                    HandlersResponseUtil.buildBodySuccessPageableResponse(
-                            ExceptionStatusCode.OK.status(), loans, size, page, count
-                    )
-                ).flatMap( response ->
-                        ServerResponse.ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue( response)
-                );
+        int page = serverRequest.queryParam("page").map(Integer::parseInt).orElse(1);
+        int size = serverRequest.queryParam("size").map(Integer::parseInt).orElse(1);
+        return Mono.just(serverRequest.queryParams())
+                    .map(searchParamsMapper::queryParamsToLoanRequest)
+                    .flatMap( validatorUtil::validate )
+                    .flatMapMany( searchRequest -> loanUseCase.findPageLoans(searchRequest.size(), searchRequest.page(), searchRequest.state()))
+                    .map( loanMapper::modelToResponse )
+                    .collectList()
+                    .zipWith( loanUseCase.countLoans(), (loans, count) ->
+                        HandlersResponseUtil.buildBodySuccessPageableResponse(
+                                ExceptionStatusCode.OK.status(), loans, size, page, count
+                        )
+                    ).flatMap( response ->
+                            ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue( response)
+                    );
     }
 
 }
