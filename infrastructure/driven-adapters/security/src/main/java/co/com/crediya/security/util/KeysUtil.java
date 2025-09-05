@@ -3,8 +3,6 @@ package co.com.crediya.security.util;
 import co.com.crediya.exceptions.CrediyaInternalServerErrorException;
 import co.com.crediya.security.enums.SecurityConstants;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -17,12 +15,12 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class KeysUtil {
 
-    private final Resource resourcePublicKey;
+    private final String resourcePublicKey;
 
     public Mono<RSAPublicKey> loadPublicKey() {
 
         return  Mono.fromCallable( () -> {
-            String key = new String( resourcePublicKey.getInputStream().readAllBytes() )
+            String key = resourcePublicKey
                 .replaceAll(SecurityConstants.REGEX_START_END_KEY.getValue(), "")
                 .replaceAll(SecurityConstants.REGEX_SPACES.getValue(), "");
 
