@@ -4,6 +4,7 @@ import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.CrediyaForbiddenException;
 import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.exceptions.enums.ExceptionMessages;
+import co.com.crediya.helpers.LoanCalculator;
 import co.com.crediya.model.Loan;
 import co.com.crediya.model.LoanState;
 import co.com.crediya.model.TypeLoan;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 @RequiredArgsConstructor
@@ -61,11 +63,11 @@ public class LoanUseCase {
                 return Mono.zip(monoTypeLoan, monoStateLoan, (type, state) -> {
                     loan.setState(state.getName());
                     loan.setType(type.getName());
-                    loan.setInterestRate(type.getInterestRate());
+                    loan.setInterestRate(type.getInterestRate().setScale(2, RoundingMode.HALF_UP));
                     return loan;
                 }).zipWith( monoUser, ( fullLoan, user ) -> {
                     fullLoan.setBasePayment(user.getBasePayment());
-                    fullLoan.setMonthlyFee(BigDecimal.ZERO); // Realizar el calculo
+                    fullLoan.setMonthlyFee(LoanCalculator.calculateMonthlyFee( fullLoan.getAmount(), fullLoan.getInterestRate(), fullLoan.getDeadline() ));
                     fullLoan.setNameClient(user.getName());
                     return fullLoan;
                 });
