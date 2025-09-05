@@ -82,7 +82,6 @@ class LoanRouterRestTest {
         createLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
-                "geoeffrey@arevalo.com",
                 "100688719923243",
                 "LIBRE_INVERSION"
         );
@@ -90,7 +89,6 @@ class LoanRouterRestTest {
         createBadLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
-                "geoeffrey@arevalo.com",
                 "",
                 "LIBRE_INVERSION"
         );
@@ -106,7 +104,9 @@ class LoanRouterRestTest {
                 "MIN",
                 BigDecimal.TEN,
                 "Juan",
-                new BigDecimal("0.05")
+                BigDecimal.valueOf(0.05),
+                BigDecimal.valueOf(0.05)
+
         );
 
         loan = Loan.builder()

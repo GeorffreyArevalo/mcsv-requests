@@ -37,11 +37,11 @@ public class LoanUseCase {
                     .filter( token -> token.getSubject().equals(user.getEmail()) )
             )
             .switchIfEmpty( Mono.error(new CrediyaForbiddenException(ExceptionMessages.CREATE_LOAN_FORBIDDEN.getMessage())) )
-            .then(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())
-            .map( loanStatus ->  {
+            .zipWith(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus()), (token, loanStatus) -> {
+                loan.setNotificationEmail(token.getSubject());
                 loan.setIdLoanState(loanStatus.getId());
                 return loan;
-            }))
+            })
             .flatMap(loanRepositoryPort::saveLoan);
     }
 

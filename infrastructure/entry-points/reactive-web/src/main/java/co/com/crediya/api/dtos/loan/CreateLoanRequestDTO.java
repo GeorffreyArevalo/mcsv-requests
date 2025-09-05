@@ -18,8 +18,6 @@ public record CreateLoanRequestDTO(
         @PastOrPresent( message = "must be after today")
         LocalDate deadline,
 
-        String notificationEmail,
-
         @NotBlank(message = "is required!")
         String userDocument,
 
