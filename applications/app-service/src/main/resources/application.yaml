@@ -6,21 +6,9 @@ spring:
   devtools:
     add-properties: false
   profiles:
+    active: ${PROFILE:dev}
     include: null
 
-  r2dbc:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  config:
-    import: aws-secretsmanager:crediya/requests
-
-
-adapter:
-  restconsumer:
-    timeout: ${RESTCONSUMER_TIMEOUT}
-    url: ${RESTCONSUMER_URL}
 management:
   health:
     circuitbreakers:
@@ -54,8 +42,7 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
-cors:
-  allowed-origins: ${ALLOWED_ORIGINS}
+
 
 routes:
   paths:
@@ -72,6 +59,3 @@ springdoc:
   paths-to-match:
     - /**
 
-security:
-  jwt:
-    public-key-location: ${JWT_PUBLIC_KEY}

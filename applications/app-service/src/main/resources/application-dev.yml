@@ -1,0 +1,17 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3307/requests?allowPublicKeyRetrieval=true&useSSL=false
+    username: user
+    password: 1234
+
+adapter:
+  restconsumer:
+    timeout: 5000
+    url: http://localhost:8080
+
+cors:
+  allowed-origins: http://localhost:4200,http://localhost:8080
+
+security:
+  jwt:
+    public-key-location: -----BEGIN PUBLIC KEY----- MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA42FbvpuLE7KUTuPSJ2xV PQRa7g1kIAnYzmfnHWb3b+T+tecHj14irV9NaIUk6JrJcsx1JOL1SpHTGj2TG4D/ 61Be4GUeGKONFn4snCK85UM9547sM2NS8A5KbSCku1ryl14SVu/zMK6cz4pNkKIh RfdPwvxsb6Sz2gX21Aj82Lb/12pAmG/qH5H8rQ8AIwQnKA7xD9Ix4Cxamv1hkWqk 6xWPGVp/SpCuN8HhZ/bgfHcxHzA0PSOopvDVW9U19RVTZjV+lIo+jvF2V4p8WPHG Va26uOz3WVxHytMT8noxKD/D71J3Mrd+vHQP/7+uKcJrrZXUvHZHzOdQJB9n0wXg DwIDAQAB -----END PUBLIC KEY-----

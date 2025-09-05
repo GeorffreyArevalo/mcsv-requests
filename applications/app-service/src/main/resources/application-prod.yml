@@ -1,0 +1,20 @@
+spring:
+  r2dbc:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  config:
+    import: aws-secretsmanager:crediya/requests
+
+adapter:
+  restconsumer:
+    timeout: ${RESTCONSUMER_TIMEOUT}
+    url: ${RESTCONSUMER_URL}
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
+
+security:
+  jwt:
+    public-key-location: ${JWT_PUBLIC_KEY}
