@@ -1,16 +1,16 @@
 spring:
+  config:
+    import: ${AWS_NAME_SECRET_MANAGER}
   r2dbc:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-  config:
-    import: aws-secretsmanager:crediya/requests
 
 adapter:
   restconsumer:
-    timeout: ${RESTCONSUMER_TIMEOUT}
-    url: ${RESTCONSUMER_URL}
+    timeout: ${REST_CONSUMER_TIMEOUT}
+    url: ${REST_CONSUMER_URL}
 
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}
