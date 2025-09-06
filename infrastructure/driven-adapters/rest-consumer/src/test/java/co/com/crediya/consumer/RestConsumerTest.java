@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -51,7 +50,6 @@ class RestConsumerTest {
                 .accessToken("21313")
                 .subject("garevalo@gmail.com")
                 .role("ADMIN")
-                .permissions(List.of())
                 .build();
     }
 
@@ -60,8 +58,9 @@ class RestConsumerTest {
         mockWebServer.shutdown();
     }
 
+    // ----------------- TESTS getUserByDocument -----------------
     @Test
-    void getUserByDocument_withValidToken_shouldReturnUser() {
+    void getUserByDocumentWithValidTokenShouldReturnUser() {
         String document = "123";
 
         User user = new User();
@@ -83,8 +82,7 @@ class RestConsumerTest {
     }
 
     @Test
-    void getUserByDocument_withoutTokenShouldThrowInternalServerErrorException() {
-
+    void getUserByDocumentWithoutTokenShouldThrowInternalServerErrorException() {
         String document = "123";
 
         when(securityAuthenticationPort.getCurrentContextToken()).thenReturn(Mono.empty());
@@ -102,7 +100,6 @@ class RestConsumerTest {
 
     @Test
     void getUserByDocumentWithNotFoundResponseShouldThrowCrediyaException() {
-
         String document = "123";
 
         when(securityAuthenticationPort.getCurrentContextToken()).thenReturn(Mono.just(token));
@@ -124,7 +121,6 @@ class RestConsumerTest {
 
     @Test
     void getUserByDocumentWithInternalServerErrorShouldThrowCrediyaException() {
-
         String document = "123";
 
         when(securityAuthenticationPort.getCurrentContextToken()).thenReturn(Mono.just(token));
@@ -142,5 +138,56 @@ class RestConsumerTest {
                 .verify();
 
         verify(securityAuthenticationPort, times(1)).getCurrentContextToken();
+    }
+
+    @Test
+    void roleHasPermissionToPathShouldReturnTrue() {
+        String roleCode = "ADMIN";
+        String path = "/api/v1/test";
+        String method = "GET";
+        String accessToken = "Bearer 123";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"data\":true}")
+                .addHeader("Content-Type", "application/json"));
+
+        StepVerifier.create(userRestConsumer.roleHasPermissionToPath(roleCode, path, method, accessToken))
+                .expectNext(true)
+                .verifyComplete();
+    }
+
+    @Test
+    void roleHasPermissionToPathShouldReturnFalse() {
+        String roleCode = "USER";
+        String path = "/api/v1/test";
+        String method = "POST";
+        String accessToken = "Bearer 456";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"data\":false}")
+                .addHeader("Content-Type", "application/json"));
+
+        StepVerifier.create(userRestConsumer.roleHasPermissionToPath(roleCode, path, method, accessToken))
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void roleHasPermissionToPathWithServerErrorShouldEmitError() {
+        String roleCode = "ADMIN";
+        String path = "/api/v1/test";
+        String method = "GET";
+        String accessToken = "Bearer 789";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody("{\"message\":\"Server error\"}")
+                .addHeader("Content-Type", "application/json"));
+
+        StepVerifier.create(userRestConsumer.roleHasPermissionToPath(roleCode, path, method, accessToken))
+                .expectError()
+                .verify();
     }
 }

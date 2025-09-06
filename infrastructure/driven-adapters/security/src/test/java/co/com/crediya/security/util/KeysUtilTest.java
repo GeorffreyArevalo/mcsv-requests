@@ -1,54 +1,55 @@
 package co.com.crediya.security.util;
 
 import co.com.crediya.exceptions.CrediyaInternalServerErrorException;
-import co.com.crediya.security.enums.SecurityConstants;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import reactor.test.StepVerifier;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+
 class KeysUtilTest {
 
-    private Resource validResource;
-    private Resource invalidResource;
+    private String validPublicKey;
+    private String invalidPublicKey;
 
     @BeforeEach
     void setUp() throws Exception {
-
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         KeyPair keyPair = keyGen.generateKeyPair();
 
-        byte[] encoded = keyPair.getPublic().getEncoded();
-        String base64Key = Base64.getEncoder().encodeToString(encoded);
+        String publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+        validPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
+                publicKeyBase64 +
+                "\n-----END PUBLIC KEY-----";
 
-        String pem = "-----BEGIN PUBLIC KEY-----\n"
-                + base64Key
-                + "\n-----END PUBLIC KEY-----";
-
-        validResource = new ByteArrayResource(pem.getBytes());
-
-        String invalidPem = "-----BEGIN PUBLIC KEY-----\nINVALID_KEY\n-----END PUBLIC KEY-----";
-        invalidResource = new ByteArrayResource(invalidPem.getBytes());
+        invalidPublicKey = "-----BEGIN PUBLIC KEY-----\nINVALID_KEY\n-----END PUBLIC KEY-----";
     }
 
     @Test
+    @DisplayName("must load successfully RSAPublicKey")
     void loadPublicKeyShouldReturnValidKey() {
-        KeysUtil keysUtil = new KeysUtil(validResource);
+        KeysUtil keysUtil = new KeysUtil(validPublicKey);
 
         StepVerifier.create(keysUtil.loadPublicKey())
-                .expectNextMatches(key -> key.getAlgorithm().equals(SecurityConstants.TYPE_ALGORITHM.getValue()))
+                .assertNext(publicKey -> {
+                    assertNotNull(publicKey);
+                    assertEquals("RSA", publicKey.getAlgorithm());
+                })
                 .verifyComplete();
     }
 
     @Test
-    void loadPublicKey_shouldThrowExceptionWhenInvalidKey() {
-        KeysUtil keysUtil = new KeysUtil(invalidResource);
+    @DisplayName("must throw exception if RSAPublicKey if invalid")
+    void loadPublicKeyShouldThrowExceptionWhenInvalid() {
+        KeysUtil keysUtil = new KeysUtil(invalidPublicKey);
 
         StepVerifier.create(keysUtil.loadPublicKey())
                 .expectErrorMatches(CrediyaInternalServerErrorException.class::isInstance)

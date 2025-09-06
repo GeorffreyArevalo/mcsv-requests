@@ -52,7 +52,6 @@ class JwtAuthenticationAdapterTest {
                 .expectNextMatches(token ->
                         token.getSubject().equals("user@example.com") &&
                                 token.getRole().equals("ADMIN") &&
-                                token.getPermissions().containsAll(List.of("READ", "WRITE")) &&
                                 token.getAccessToken().equals(bearerToken)
                 )
                 .verifyComplete();

@@ -15,9 +15,8 @@ import java.time.LocalDate;
 class LoanMapperTest {
 
     private final CreateLoanRequestDTO createLoanRequestDTO = new CreateLoanRequestDTO(
-            new BigDecimal("10.0"),
+            BigDecimal.valueOf(10.0),
             LocalDate.now(),
-            "geoeffrey@arevalo.com",
             "100688719923243",
             "LIBRE_INVERSION"
     );

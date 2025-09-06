@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -55,7 +55,6 @@ class LoanUseCaseTest {
                 .accessToken("21313")
                 .subject("julian@gmail.com")
                 .role("ADMIN")
-                .permissions(List.of())
                 .build();
     }
 
@@ -82,29 +81,37 @@ class LoanUseCaseTest {
 
     @Test
     void findPageLoansShouldReturnLoans() {
-        Loan loan = new Loan();
-        loan.setIdTypeLoan(10L);
-        loan.setIdLoanState(20L);
-        loan.setUserDocument("123");
+        Loan loan = Loan.builder()
+                .idTypeLoan(10L)
+                .idLoanState(20L)
+                .userDocument("123")
+                .amount(BigDecimal.valueOf(1000000.0))
+                .deadline(LocalDate.now().plusYears(1))
+                .build();
 
-        LoanState state = new LoanState();
-        state.setId(20L);
-        state.setName("PENDING");
 
-        TypeLoan typeLoan = new TypeLoan();
-        typeLoan.setId(10L);
-        typeLoan.setName("Personal Loan");
-        typeLoan.setInterestRate(new BigDecimal("5.5"));
+        LoanState state = LoanState.builder()
+                .id(20L)
+                .name("PENDING")
+                .build();
 
-        User user = new User();
-        user.setName("John Doe");
-        user.setBasePayment(new BigDecimal("1000.0"));
+        TypeLoan typeLoan = TypeLoan.builder()
+                .id(10L)
+                .name("Personal Loan")
+                .interestRate(BigDecimal.valueOf(5.5))
+                .build();
+
+        User user = User.builder()
+                .name("John Doe")
+                .basePayment(BigDecimal.valueOf(1000.0))
+                .build();
 
         when(loanStateRepositoryPort.findByCode("PENDING")).thenReturn(Mono.just(state));
         when(loanRepositoryPort.findLoans(10, 0, 20L)).thenReturn(Flux.just(loan));
         when(typeLoanRepositoryPort.findById(10L)).thenReturn(Mono.just(typeLoan));
         when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
         when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
+        when( userServicePort.roleHasPermissionToPath( any(String.class), any(String.class), any(String.class), any(String.class) ) ).thenReturn(Mono.just(true));
 
         StepVerifier.create(loanUseCase.findPageLoans(10, 0, "PENDING"))
                 .expectNextMatches(result ->

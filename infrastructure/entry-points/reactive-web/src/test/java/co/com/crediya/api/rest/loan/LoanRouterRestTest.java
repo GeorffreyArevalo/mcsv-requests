@@ -3,7 +3,9 @@ package co.com.crediya.api.rest.loan;
 import co.com.crediya.api.config.PathsConfig;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.LoanResponseDTO;
+import co.com.crediya.api.dtos.loan.SearchLoansRequestDTO;
 import co.com.crediya.api.mappers.LoanMapper;
+import co.com.crediya.api.mappers.SearchParamsMapper;
 import co.com.crediya.api.util.ValidatorUtil;
 import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
@@ -56,12 +58,17 @@ class LoanRouterRestTest {
     @MockitoBean
     private LoanMapper loanMapper;
 
+    @MockitoBean
+    private SearchParamsMapper searchParamsMapper;
+
     private CreateLoanRequestDTO createLoanRequest;
     private CreateLoanRequestDTO createBadLoanRequest;
     private LoanResponseDTO loanResponse;
     private Loan loan;
 
     private TypeLoan typeLoan;
+
+    private SearchLoansRequestDTO searchLoansRequestDTO;
 
     @Autowired
     private PathsConfig pathsConfig;
@@ -118,6 +125,10 @@ class LoanRouterRestTest {
                 .notificationEmail("geoeffrey@arevalo.com")
                 .build();
 
+        searchLoansRequestDTO = new SearchLoansRequestDTO(
+                10, 0, "APROBADA"
+        );
+
     }
 
     @Test
@@ -152,16 +163,23 @@ class LoanRouterRestTest {
     }
 
     @Test
-    @DisplayName("listenFindPageableLoans debe retornar préstamos paginados con 200")
+    @DisplayName("must return loans")
     void listenFindPageableLoans_shouldReturnPagedLoans() {
 
         when(loanUseCase.findPageLoans(10, 0, LoanStateCodes.APPROVED.getStatus()))
                 .thenReturn(Flux.just(loan));
         when(loanMapper.modelToResponse(loan)).thenReturn(loanResponse);
         when(loanUseCase.countLoans()).thenReturn(Mono.just(1L));
+        when( searchParamsMapper.queryParamsToLoanRequest(any()) ).thenReturn(searchLoansRequestDTO);
 
         webTestClient.get()
-                .uri(LOANS_PATH )
+                .uri( uriBuilder ->
+                    uriBuilder.path(LOANS_PATH)
+                            .queryParam("size", searchLoansRequestDTO.size())
+                            .queryParam("page", searchLoansRequestDTO.page())
+                            .queryParam("state", searchLoansRequestDTO.state())
+                            .build()
+                )
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
