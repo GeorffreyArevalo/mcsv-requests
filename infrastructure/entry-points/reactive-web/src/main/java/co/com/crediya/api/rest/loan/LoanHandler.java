@@ -3,6 +3,7 @@ package co.com.crediya.api.rest.loan;
 import co.com.crediya.api.dtos.CrediyaResponseDTO;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.FindLoansResponseDTO;
+import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.dtos.loan.UpdateStateLoanRequestDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.mappers.SearchParamsMapper;
@@ -74,8 +75,17 @@ public class LoanHandler {
     }
 
 
-
-
+    @Operation( tags = "Loans", operationId = "updateStateLoan", description = "Update state of loan", summary = "Update state of loan",
+            requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = UpdateStateLoanRequestDTO.class ) ) ),
+            parameters = {
+                    @Parameter( in = ParameterIn.PATH, name = "id", description = "State of loan", required = true, example = "2" ),
+                    @Parameter( in = ParameterIn.HEADER, name = "Authorization", description = "Bearer token", required = true, example = "mkasjdlkjas782347812" ),
+            },
+            responses = { @ApiResponse( responseCode = "200", description = "State updated successfully.", content = @Content( array = @ArraySchema( schema = @Schema( implementation = LoanResponseDTO.class ) ) ) ),
+                    @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
+                    @ApiResponse( responseCode = "403", description = "Access Denied.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
+            }
+    )
     public Mono<ServerResponse> listenUpdateStateLoan(ServerRequest serverRequest) {
 
         String idLoan = serverRequest.pathVariable("id");

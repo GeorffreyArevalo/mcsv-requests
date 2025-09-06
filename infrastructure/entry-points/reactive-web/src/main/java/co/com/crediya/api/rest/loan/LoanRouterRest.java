@@ -26,7 +26,8 @@ public class LoanRouterRest {
     @Bean
     @RouterOperations({
             @RouterOperation(path = "/api/v1/loans", produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.POST, beanClass = LoanHandler.class, beanMethod = "listenSaveLoan"),
-            @RouterOperation(path = "/api/v1/loans", produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.GET, beanClass = LoanHandler.class, beanMethod = "listenFindPageableLoans")
+            @RouterOperation(path = "/api/v1/loans", produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.GET, beanClass = LoanHandler.class, beanMethod = "listenFindPageableLoans"),
+            @RouterOperation(path = "/api/v1/loans/{id}", produces = {MediaType.APPLICATION_JSON_VALUE,}, method = RequestMethod.PUT, beanClass = LoanHandler.class, beanMethod = "listenUpdateStateLoan")
     })
     public RouterFunction<ServerResponse> routerFunction(LoanHandler handler) {
         return route(POST(pathsConfig.getLoans()), handler::listenSaveLoan)
