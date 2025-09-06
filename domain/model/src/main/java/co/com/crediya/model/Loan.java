@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class Loan {
 
+    private Long id;
     private BigDecimal amount;
     private LocalDate deadline;
     private String notificationEmail;

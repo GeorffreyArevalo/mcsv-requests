@@ -46,7 +46,23 @@ public class LoanUseCase {
             .flatMap(loanRepositoryPort::saveLoan);
     }
 
+    public Mono<Loan> updateStateLoan(Long idLoan, String codeState) {
 
+        return loanRepositoryPort.findById(idLoan)
+                .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
+                        String.format(ExceptionMessages.LOAN_WITH_ID_NOT_FOUND.getMessage(), idLoan)
+                )) )
+                .flatMap( loan ->
+                    loanStateRepositoryPort.findByCode(codeState)
+                        .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
+                                String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
+                        )))
+                        .flatMap( loanState -> {
+                            loan.setIdLoanState(loanState.getId());
+                            return loanRepositoryPort.saveLoan(loan);
+                        })
+                );
+    }
 
     public Flux<Loan> findPageLoans(int size, int page, String codeState ) {
 

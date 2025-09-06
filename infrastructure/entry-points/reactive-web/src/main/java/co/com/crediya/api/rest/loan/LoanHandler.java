@@ -2,12 +2,12 @@ package co.com.crediya.api.rest.loan;
 
 import co.com.crediya.api.dtos.CrediyaResponseDTO;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
-import co.com.crediya.api.dtos.loan.LoanResponseDTO;
+import co.com.crediya.api.dtos.loan.FindLoansResponseDTO;
+import co.com.crediya.api.dtos.loan.UpdateStateLoanRequestDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.mappers.SearchParamsMapper;
 import co.com.crediya.api.util.HandlersResponseUtil;
 import co.com.crediya.api.util.ValidatorUtil;
-import co.com.crediya.enums.LoanStateCodes;
 import co.com.crediya.exceptions.enums.ExceptionStatusCode;
 import co.com.crediya.usecase.loan.LoanUseCase;
 import co.com.crediya.usecase.typeloan.TypeLoanUseCase;
@@ -25,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -46,7 +45,7 @@ public class LoanHandler {
 
     @Operation( tags = "Loans", operationId = "saveLoan", description = "Save a request of loan", summary = "Save a request of loan",
             requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = CreateLoanRequestDTO.class ) ) ),
-            responses = { @ApiResponse( responseCode = "201", description = "Loan saved successfully.", content = @Content( schema = @Schema( implementation = LoanResponseDTO.class ) ) ),
+            responses = { @ApiResponse( responseCode = "201", description = "Loan saved successfully.", content = @Content( schema = @Schema( implementation = FindLoansResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "400", description = "Request body is not valid.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "404", description = "User document sent is not found.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
@@ -66,13 +65,32 @@ public class LoanHandler {
                     .map( typeLoan -> loanMapper.createRequestToModel(loanRequest, typeLoan.getId()) )
             )
             .flatMap( loanUseCase::saveLoan )
-            .map( loanMapper::modelToResponse )
+            .map( loanMapper::modelToResponse)
             .flatMap( savedLoan ->
                 ServerResponse.created(URI.create(""))
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(HandlersResponseUtil.buildBodySuccessResponse(ExceptionStatusCode.CREATED.status(), savedLoan) )
             );
     }
+
+
+
+
+    public Mono<ServerResponse> listenUpdateStateLoan(ServerRequest serverRequest) {
+
+        String idLoan = serverRequest.pathVariable("id");
+        return serverRequest.bodyToMono(UpdateStateLoanRequestDTO.class)
+                .flatMap( validatorUtil::validate )
+                .flatMap( updateStateLoanRequestDTO -> loanUseCase.updateStateLoan(Long.parseLong(idLoan), updateStateLoanRequestDTO.codeState()) )
+                .map( loanMapper::modelToResponse )
+                .flatMap( loanResponse ->
+                    ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(HandlersResponseUtil.buildBodySuccessResponse(ExceptionStatusCode.OK.status(), loanResponse))
+                );
+    }
+
+
 
     @Operation( tags = "Loans", operationId = "findPageableLoans", description = "Find loans with pagination", summary = "Find loans with pagination",
             requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = CreateLoanRequestDTO.class ) ) ),
@@ -82,7 +100,7 @@ public class LoanHandler {
                 @Parameter( in = ParameterIn.QUERY, name = "state", description = "State of loan", required = true, example = "APROBADO" ),
                 @Parameter( in = ParameterIn.HEADER, name = "Authorization", description = "Bearer token", required = true, example = "mkasjdlkjas782347812" ),
             },
-            responses = { @ApiResponse( responseCode = "201", description = "Loans found successfully.", content = @Content( array = @ArraySchema( schema = @Schema( implementation = LoanResponseDTO.class ) ) ) ),
+            responses = { @ApiResponse( responseCode = "201", description = "Loans found successfully.", content = @Content( array = @ArraySchema( schema = @Schema( implementation = FindLoansResponseDTO.class ) ) ) ),
                     @ApiResponse( responseCode = "401", description = "Unauthorized.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) ),
                     @ApiResponse( responseCode = "403", description = "Access Denied.", content = @Content( schema = @Schema( implementation = CrediyaResponseDTO.class ) ) )
             }
@@ -94,7 +112,7 @@ public class LoanHandler {
                     .map(searchParamsMapper::queryParamsToLoanRequest)
                     .flatMap( validatorUtil::validate )
                     .flatMapMany( searchRequest -> loanUseCase.findPageLoans(searchRequest.size(), searchRequest.page(), searchRequest.state()))
-                    .map( loanMapper::modelToResponse )
+                    .map( loanMapper::modelToFindLoanResponse)
                     .collectList()
                     .zipWith( loanUseCase.countLoans(), (loans, count) ->
                         HandlersResponseUtil.buildBodySuccessPageableResponse(

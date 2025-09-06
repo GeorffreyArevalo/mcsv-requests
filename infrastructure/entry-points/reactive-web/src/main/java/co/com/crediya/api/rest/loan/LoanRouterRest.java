@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -29,6 +30,7 @@ public class LoanRouterRest {
     })
     public RouterFunction<ServerResponse> routerFunction(LoanHandler handler) {
         return route(POST(pathsConfig.getLoans()), handler::listenSaveLoan)
-                .andRoute( GET( pathsConfig.getLoans()), handler::listenFindPageableLoans );
+                .andRoute( GET( pathsConfig.getLoans()), handler::listenFindPageableLoans )
+                .andRoute( PUT(pathsConfig.getLoansById()), handler::listenUpdateStateLoan );
     }
 }

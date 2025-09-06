@@ -18,8 +18,6 @@ public class SecurityHeadersConfig implements WebFilter {
 
     private final AuthUseCase authUseCase;
 
-    // Consultar roles de bd
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -33,6 +31,7 @@ public class SecurityHeadersConfig implements WebFilter {
         headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
         return Mono.just( request.getPath().value() )
+                .log()
             .filter( path -> !path.contains("/openapi/") )
             .flatMap( path ->
                 Mono.justOrEmpty( request.getHeaders().getFirst( HttpHeaders.AUTHORIZATION ) )

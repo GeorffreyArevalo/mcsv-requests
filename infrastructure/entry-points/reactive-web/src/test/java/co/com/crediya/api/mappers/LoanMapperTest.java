@@ -2,7 +2,7 @@ package co.com.crediya.api.mappers;
 
 
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
-import co.com.crediya.api.dtos.loan.LoanResponseDTO;
+import co.com.crediya.api.dtos.loan.FindLoansResponseDTO;
 import co.com.crediya.model.Loan;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -48,8 +48,8 @@ class LoanMapperTest {
 
 
     @Test
-    void testModelToResponse() {
-        Mono<LoanResponseDTO> result = Mono.fromCallable(() -> loanMapper.modelToResponse(loan));
+    void testModelToFindLoanResponse() {
+        Mono<FindLoansResponseDTO> result = Mono.fromCallable(() -> loanMapper.modelToFindLoanResponse(loan));
 
         StepVerifier.create(result)
                 .expectNextMatches( loanResponseResult ->

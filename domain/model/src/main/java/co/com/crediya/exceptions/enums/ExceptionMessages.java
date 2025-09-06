@@ -11,6 +11,7 @@ public enum ExceptionMessages {
     DO_NOT_ACCESS_RESOURCE("Doesn't have access to this resource."),
     UNAUTHORIZED_SENT_TOKEN_INVALID("Doesn't access - Unauthorized Sent Token."),
     STATE_LOAN_WITH_CODE_NOT_FOUND("State loan with code %s not found."),
+    LOAN_WITH_ID_NOT_FOUND("loan with id %s not found."),
     TYPE_LOAN_WITH_CODE_NOT_FOUND("Type loan with code %s not found.");
 
     private final String message;

@@ -1,6 +1,7 @@
 package co.com.crediya.api.mappers;
 
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
+import co.com.crediya.api.dtos.loan.FindLoansResponseDTO;
 import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.model.Loan;
 import org.mapstruct.Mapper;
@@ -20,7 +21,9 @@ public interface LoanMapper {
             target = "idTypeLoan"
     )
     Loan createRequestToModel(CreateLoanRequestDTO request, Long idTypeLoan);
-    LoanResponseDTO modelToResponse(Loan model);
 
+    FindLoansResponseDTO modelToFindLoanResponse(Loan model);
+
+    LoanResponseDTO modelToResponse(Loan model);
 
 }
