@@ -11,9 +11,14 @@ import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.model.gateways.TypeLoanRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
 import co.com.crediya.port.consumers.model.User;
+import co.com.crediya.port.queue.SendQueuePort;
 import co.com.crediya.port.token.SecurityAuthenticationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -24,32 +29,34 @@ import java.time.LocalDate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class LoanUseCaseTest {
 
+    @Mock
     private LoanRepositoryPort loanRepositoryPort;
+
+    @Mock
     private LoanStateRepositoryPort loanStateRepositoryPort;
+
+    @Mock
     private TypeLoanRepositoryPort typeLoanRepositoryPort;
+
+    @Mock
     private UserServicePort userServicePort;
+
+    @Mock
     private SecurityAuthenticationPort securityAuthenticationPort;
+
+    @Mock
+    private SendQueuePort sendQueuePort;
+
+    @InjectMocks
     private LoanUseCase loanUseCase;
 
     private Token token;
 
     @BeforeEach
     void setUp() {
-        loanRepositoryPort = mock(LoanRepositoryPort.class);
-        loanStateRepositoryPort = mock(LoanStateRepositoryPort.class);
-        typeLoanRepositoryPort = mock(TypeLoanRepositoryPort.class);
-        userServicePort = mock(UserServicePort.class);
-        securityAuthenticationPort = mock(SecurityAuthenticationPort.class);
-
-        loanUseCase = new LoanUseCase(
-                loanRepositoryPort,
-                loanStateRepositoryPort,
-                typeLoanRepositoryPort,
-                userServicePort,
-                securityAuthenticationPort
-        );
 
         token = Token.builder()
                 .accessToken("21313")
@@ -111,7 +118,7 @@ class LoanUseCaseTest {
         when(typeLoanRepositoryPort.findById(10L)).thenReturn(Mono.just(typeLoan));
         when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
         when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
-        when( userServicePort.roleHasPermissionToPath( any(String.class), any(String.class), any(String.class), any(String.class) ) ).thenReturn(Mono.just(true));
+
 
         StepVerifier.create(loanUseCase.findPageLoans(10, 0, "PENDING"))
                 .expectNextMatches(result ->

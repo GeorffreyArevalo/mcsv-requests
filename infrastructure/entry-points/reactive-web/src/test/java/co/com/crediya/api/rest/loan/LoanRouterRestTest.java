@@ -3,6 +3,7 @@ package co.com.crediya.api.rest.loan;
 import co.com.crediya.api.config.PathsConfig;
 import co.com.crediya.api.dtos.loan.CreateLoanRequestDTO;
 import co.com.crediya.api.dtos.loan.FindLoansResponseDTO;
+import co.com.crediya.api.dtos.loan.LoanResponseDTO;
 import co.com.crediya.api.dtos.loan.SearchLoansRequestDTO;
 import co.com.crediya.api.mappers.LoanMapper;
 import co.com.crediya.api.mappers.SearchParamsMapper;
@@ -63,7 +64,8 @@ class LoanRouterRestTest {
 
     private CreateLoanRequestDTO createLoanRequest;
     private CreateLoanRequestDTO createBadLoanRequest;
-    private FindLoansResponseDTO loanResponse;
+    private FindLoansResponseDTO findLoansResponseDTO;
+    private LoanResponseDTO loanResponseDTO;
     private Loan loan;
 
     private TypeLoan typeLoan;
@@ -100,7 +102,7 @@ class LoanRouterRestTest {
                 "LIBRE_INVERSION"
         );
 
-        loanResponse = new FindLoansResponseDTO(
+        findLoansResponseDTO = new FindLoansResponseDTO(
                 new BigDecimal("10.0"),
                 LocalDate.now(),
                 "geoeffrey@arevalo.com",
@@ -114,6 +116,15 @@ class LoanRouterRestTest {
                 BigDecimal.valueOf(0.05),
                 BigDecimal.valueOf(0.05)
 
+        );
+
+        loanResponseDTO = new LoanResponseDTO(
+                BigDecimal.valueOf(10.0),
+                LocalDate.now(),
+                "geoeffrey@arevalo.com",
+                "100688719923243",
+                1L,
+                1L
         );
 
         loan = Loan.builder()
@@ -145,7 +156,7 @@ class LoanRouterRestTest {
         when( loanUseCase.saveLoan(loan) ).thenReturn(Mono.just(loan));
         when( typeLoanUseCase.findByCode(typeLoan.getCode()) ).thenReturn(Mono.just(typeLoan));
 
-        when( loanMapper.modelToFindLoanResponse( any(Loan.class) ) ).thenReturn( loanResponse );
+        when( loanMapper.modelToResponse( any(Loan.class) ) ).thenReturn(loanResponseDTO);
         when( loanMapper.createRequestToModel( any( CreateLoanRequestDTO.class ), any() ) ).thenReturn( loan );
 
         webTestClient.post()
@@ -168,7 +179,7 @@ class LoanRouterRestTest {
 
         when(loanUseCase.findPageLoans(10, 0, LoanStateCodes.APPROVED.getStatus()))
                 .thenReturn(Flux.just(loan));
-        when(loanMapper.modelToFindLoanResponse(loan)).thenReturn(loanResponse);
+        when(loanMapper.modelToFindLoanResponse(loan)).thenReturn(findLoansResponseDTO);
         when(loanUseCase.countLoans()).thenReturn(Mono.just(1L));
         when( searchParamsMapper.queryParamsToLoanRequest(any()) ).thenReturn(searchLoansRequestDTO);
 
