@@ -27,6 +27,7 @@ public class Loan {
     private String type;
     private BigDecimal basePayment;
     private String nameClient;
+    private String lastNameClient;
     private BigDecimal monthlyFee;
     private BigDecimal interestRate;
 

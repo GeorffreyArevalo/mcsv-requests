@@ -13,6 +13,8 @@ import co.com.crediya.model.gateways.LoanStateRepositoryPort;
 import co.com.crediya.model.gateways.TypeLoanRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
 import co.com.crediya.port.consumers.model.User;
+import co.com.crediya.port.queue.SendQueuePort;
+import co.com.crediya.port.queue.messages.MessageNotificationQueue;
 import co.com.crediya.port.token.SecurityAuthenticationPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,7 @@ public class LoanUseCase {
     private final TypeLoanRepositoryPort typeLoanRepositoryPort;
     private final UserServicePort userServicePort;
     private final SecurityAuthenticationPort securityAuthenticationPort;
+    private final SendQueuePort sendQueuePort;
 
 
     public Mono<Loan> saveLoan(Loan loan) {
@@ -49,19 +52,19 @@ public class LoanUseCase {
     public Mono<Loan> updateStateLoan(Long idLoan, String codeState) {
 
         return loanRepositoryPort.findById(idLoan)
-                .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
-                        String.format(ExceptionMessages.LOAN_WITH_ID_NOT_FOUND.getMessage(), idLoan)
-                )) )
-                .flatMap( loan ->
-                    loanStateRepositoryPort.findByCode(codeState)
-                        .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
-                                String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
-                        )))
-                        .flatMap( loanState -> {
-                            loan.setIdLoanState(loanState.getId());
-                            return loanRepositoryPort.saveLoan(loan);
-                        })
-                );
+            .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
+                    String.format(ExceptionMessages.LOAN_WITH_ID_NOT_FOUND.getMessage(), idLoan)
+            )) )
+            .flatMap( loan ->
+                loanStateRepositoryPort.findByCode(codeState)
+                .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
+                    String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
+                )))
+                .flatMap( loanState -> {
+                    loan.setIdLoanState(loanState.getId());
+                    return loanRepositoryPort.saveLoan(loan);
+                })
+            ).flatMap( this::sendMessageEmail );
     }
 
     public Flux<Loan> findPageLoans(int size, int page, String codeState ) {
@@ -92,5 +95,19 @@ public class LoanUseCase {
     public Mono<Long> countLoans() {
         return loanRepositoryPort.count();
     }
+
+    private Mono<Loan> sendMessageEmail(Loan loan) {
+        return Mono.zip( userServicePort.getUserByDocument(loan.getUserDocument()), loanStateRepositoryPort.findById(loan.getIdLoanState()))
+                .flatMap( tuple -> {
+                    User user = tuple.getT1();
+                    LoanState loanState = tuple.getT2();
+                    MessageNotificationQueue messageNotificationQueue = MessageNotificationQueue
+                        .builder().amount(loan.getAmount()).stateLoan(loanState.getName()).clientLastName(user.getLastName())
+                        .clientName(user.getName()).email(loan.getNotificationEmail()).build();
+                    return sendQueuePort.sendNotificationChangeStateLoan(messageNotificationQueue).thenReturn(loan);
+                });
+
+    }
+
 
 }

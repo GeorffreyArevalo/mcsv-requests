@@ -9,6 +9,11 @@ adapter:
     timeout: 5000
     url: http://localhost:8080
 
+  sqs:
+    region: "us-east-1"
+    queueNotificationUrl: "https://sqs.us-east-1.amazonaws.com/119694354572/poller-notifications"
+
+
 cors:
   allowed-origins: http://localhost:4200,http://localhost:8080
 
