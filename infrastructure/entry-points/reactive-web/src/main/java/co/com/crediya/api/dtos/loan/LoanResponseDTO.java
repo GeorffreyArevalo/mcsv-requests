@@ -1,11 +1,10 @@
 package co.com.crediya.api.dtos.loan;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public record LoanResponseDTO(
         BigDecimal amount,
-        LocalDate deadline,
+        Integer monthTerm,
         String notificationEmail,
         String userDocument,
         Long idLoanState,

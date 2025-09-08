@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Table("loans")
 @Data
@@ -20,7 +19,7 @@ public class LoanEntity {
     @Id
     private Long id;
     private BigDecimal amount;
-    private LocalDate deadline;
+    private Integer monthTerm;
     private String notificationEmail;
     private String userDocument;
     private Long idTypeLoan;

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public record UpdateStateLoanRequestDTO(
 
-        @NotBlank(message = "es required.")
+        @NotBlank(message = "is required.")
         String codeState
 ) {
 }

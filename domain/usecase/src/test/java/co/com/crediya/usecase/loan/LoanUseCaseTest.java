@@ -24,7 +24,6 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -93,7 +92,7 @@ class LoanUseCaseTest {
                 .idLoanState(20L)
                 .userDocument("123")
                 .amount(BigDecimal.valueOf(1000000.0))
-                .deadline(LocalDate.now().plusYears(1))
+                .monthTerm(11)
                 .build();
 
 

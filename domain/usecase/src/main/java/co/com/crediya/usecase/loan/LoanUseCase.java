@@ -85,7 +85,7 @@ public class LoanUseCase {
                     return loan;
                 }).zipWith( monoUser, ( fullLoan, user ) -> {
                     fullLoan.setBasePayment(user.getBasePayment());
-                    fullLoan.setMonthlyFee(LoanCalculator.calculateMonthlyFee( fullLoan.getAmount(), fullLoan.getInterestRate(), fullLoan.getDeadline() ));
+                    fullLoan.setMonthlyFee(LoanCalculator.calculateMonthlyFee( fullLoan.getAmount(), fullLoan.getInterestRate(), fullLoan.getMonthTerm() ));
                     fullLoan.setNameClient(user.getName());
                     return fullLoan;
                 });

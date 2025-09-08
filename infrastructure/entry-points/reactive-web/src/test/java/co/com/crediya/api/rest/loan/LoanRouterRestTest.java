@@ -28,7 +28,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,21 +89,21 @@ class LoanRouterRestTest {
 
         createLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
-                LocalDate.now(),
+                12,
                 "100688719923243",
                 "LIBRE_INVERSION"
         );
 
         createBadLoanRequest = new CreateLoanRequestDTO(
                 new BigDecimal("10.0"),
-                LocalDate.now(),
+                12,
                 "",
                 "LIBRE_INVERSION"
         );
 
         findLoansResponseDTO = new FindLoansResponseDTO(
                 new BigDecimal("10.0"),
-                LocalDate.now(),
+                12,
                 "geoeffrey@arevalo.com",
                 "100688719923243",
                 1L,
@@ -120,7 +119,7 @@ class LoanRouterRestTest {
 
         loanResponseDTO = new LoanResponseDTO(
                 BigDecimal.valueOf(10.0),
-                LocalDate.now(),
+                12,
                 "geoeffrey@arevalo.com",
                 "100688719923243",
                 1L,
@@ -131,7 +130,7 @@ class LoanRouterRestTest {
                 .idLoanState(1L)
                 .idTypeLoan(1L)
                 .amount(new BigDecimal("10.0"))
-                .deadline(LocalDate.now())
+                .monthTerm(12)
                 .userDocument("100688719923243")
                 .notificationEmail("geoeffrey@arevalo.com")
                 .build();
