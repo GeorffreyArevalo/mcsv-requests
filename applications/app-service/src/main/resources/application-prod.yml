@@ -6,21 +6,20 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-  sqs:
-    region: ${SQS_SENDER_REGION}
-    queueNotificationUrl: ${QUEUE_NOTIFICATION_URL_SEND}
-    queueDebtCapacity: ${QUEUE_DEBT_CAPACITY_URL_SEND}
-
 entrypoint:
   sqs:
     region: ${SQS_LISTENER_REGION}
     queueUrl: ${SQS_DEBT_CAPACITY_LISTENER}
 
-
 adapter:
   restconsumer:
     timeout: ${REST_CONSUMER_TIMEOUT}
     url: ${REST_CONSUMER_URL}
+
+  sqs:
+    region: ${SQS_SENDER_REGION}
+    queueNotificationUrl: ${QUEUE_NOTIFICATION_URL_SEND}
+    queueDebtCapacity: ${QUEUE_DEBT_CAPACITY_URL_SEND}
 
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}
