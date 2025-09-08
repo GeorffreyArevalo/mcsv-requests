@@ -13,6 +13,10 @@ adapter:
     region: "us-east-1"
     queueNotificationUrl: "https://sqs.us-east-1.amazonaws.com/119694354572/poller-notifications"
 
+entrypoint:
+  sqs:
+    region: "us-east-1"
+    queueUrl: "https://sqs.us-east-1.amazonaws.com/119694354572/send-debt-capacity"
 
 cors:
   allowed-origins: http://localhost:4200,http://localhost:8080

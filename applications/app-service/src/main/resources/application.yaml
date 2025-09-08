@@ -45,7 +45,6 @@ routes:
   paths:
     loans: "/api/v1/loans"
     loansById: "/api/v1/loans/{id}"
-
 springdoc:
   swagger-ui:
     path: "/openapi/swagger-ui"
@@ -55,3 +54,10 @@ springdoc:
   - "co.com.crediya"
   paths-to-match:
   - "/**"
+
+entrypoint:
+  sqs:
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1
