@@ -35,7 +35,7 @@ public class SQSSender implements SendQueuePort {
                 return buildRequest(message, properties.queueNotificationUrl());
             })
             .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-            .doOnNext(response -> log.info("Message sent {}", response.messageId()))
+            .doOnNext(response -> log.info("Message sent - notification {}", response.messageId()))
             .then(Mono.empty());
     }
 
@@ -48,7 +48,7 @@ public class SQSSender implements SendQueuePort {
             return buildRequest( objectMapper.writeValueAsString(debtCapacityQueueDTO), properties.queueDebtCapacity() );
         })
         .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-        .doOnNext(response -> log.info("Message sent {}", response.messageId()))
+        .doOnNext(response -> log.info("Message sent - debt capacity {}", response.messageId()))
         .then(Mono.empty());
     }
 

@@ -48,47 +48,31 @@ public class LoanUseCase {
                 return loan;
             })
             .flatMap(loanRepositoryPort::saveLoan)
-            .flatMap( saveLoan ->
-                    typeLoanRepositoryPort.findById(loan.getIdTypeLoan())
-                    .filter( TypeLoan::getAutoValidation )
-                    .flatMap( typeLoan ->
-                            loanRepositoryPort.findLoansByUserDocumentAndState(saveLoan.getUserDocument(), saveLoan.getUserDocument())
-                            .flatMap( approvedLoan ->
-                                typeLoanRepositoryPort.findById(approvedLoan.getIdTypeLoan())
-                                .map( approvedTypeLoan -> {
-                                    approvedLoan.setInterestRate(loan.getInterestRate());
-                                    return approvedLoan;
-                                })
-                            )
-                            .collectList()
-                            .zipWith( userServicePort.getUserByDocument(saveLoan.getUserDocument()) )
-                            .flatMap( tuple -> {
-                                List<Loan> loans = tuple.getT1();
-                                User  user = tuple.getT2();
-                                saveLoan.setInterestRate(typeLoan.getInterestRate());
-                                System.out.println("Enviando mensaje a la cola");
-                                return sendQueuePort.sendCalculateDebtCapacity(saveLoan, loans, user).thenReturn(saveLoan);
-                            })
-                    ).switchIfEmpty(Mono.just(saveLoan))
-            );
+            .flatMap( this::sendQueueToCalculateDebtCapacity);
     }
+
+
 
     public Mono<Loan> updateStateLoan(Long idLoan, String codeState) {
 
+        return this.updateLoanWithStateLoan(idLoan, codeState)
+            .flatMap( this::sendMessageEmail );
+    }
+
+    public Mono<Loan> updateLoanWithStateLoan( Long idLoan, String codeState ) {
         return loanRepositoryPort.findById(idLoan)
-            .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
+                .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
                     String.format(ExceptionMessages.LOAN_WITH_ID_NOT_FOUND.getMessage(), idLoan)
-            )) )
-            .flatMap( loan ->
+                )) )
+                .flatMap( loan ->
                 loanStateRepositoryPort.findByCode(codeState)
                 .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
-                    String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
+                        String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
                 )))
                 .flatMap( loanState -> {
                     loan.setIdLoanState(loanState.getId());
                     return loanRepositoryPort.saveLoan(loan);
-                })
-            ).flatMap( this::sendMessageEmail );
+                }));
     }
 
     public Flux<Loan> findPageLoans(int size, int page, String codeState ) {
@@ -131,6 +115,29 @@ public class LoanUseCase {
                     return sendQueuePort.sendNotificationChangeStateLoan(messageNotificationQueue).thenReturn(loan);
                 });
 
+    }
+
+    private Mono<Loan> sendQueueToCalculateDebtCapacity(Loan saveLoan) {
+        return typeLoanRepositoryPort.findById(saveLoan.getIdTypeLoan())
+            .filter( TypeLoan::getAutoValidation )
+            .flatMap( typeLoan ->
+                loanRepositoryPort.findLoansByUserDocumentAndState(saveLoan.getUserDocument(), LoanStateCodes.APPROVED.getStatus())
+                    .flatMap( approvedLoan ->
+                        typeLoanRepositoryPort.findById(approvedLoan.getIdTypeLoan())
+                            .map( approvedTypeLoan -> {
+                                approvedLoan.setInterestRate(approvedTypeLoan.getInterestRate());
+                                return approvedLoan;
+                            })
+                    )
+                    .collectList()
+                    .zipWith( userServicePort.getUserByDocument(saveLoan.getUserDocument()) )
+                    .flatMap( tuple -> {
+                        List<Loan> loans = tuple.getT1();
+                        User  user = tuple.getT2();
+                        saveLoan.setInterestRate(typeLoan.getInterestRate());
+                        return sendQueuePort.sendCalculateDebtCapacity(saveLoan, loans, user).thenReturn(saveLoan);
+                    })
+            ).switchIfEmpty(Mono.just(saveLoan));
     }
 
 

@@ -1,6 +1,5 @@
 package co.com.crediya.r2dbc.persistence.loan;
 
-import co.com.crediya.model.Loan;
 import co.com.crediya.r2dbc.entities.LoanEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -16,8 +15,8 @@ public interface LoanRepository extends ReactiveCrudRepository<LoanEntity, Long>
             SELECT l.*
             FROM loans l
             INNER JOIN loan_states ls ON l.id_loan_state = ls.id
-            WHERE ls.code = :stateCode
-              AND l.user_document = :userDocument;
+            WHERE l.user_document = :userDocument
+              AND ls.code = :stateCode;
             """)
     Flux<LoanEntity> findLoansByUserDocumentAndState(String userDocument, String stateCode );
 
