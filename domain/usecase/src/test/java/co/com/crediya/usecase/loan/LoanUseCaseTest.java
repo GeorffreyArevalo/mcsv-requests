@@ -12,6 +12,7 @@ import co.com.crediya.model.gateways.TypeLoanRepositoryPort;
 import co.com.crediya.port.consumers.UserServicePort;
 import co.com.crediya.port.consumers.model.User;
 import co.com.crediya.port.queue.SendQueuePort;
+import co.com.crediya.port.queue.messages.MessageNotificationQueue;
 import co.com.crediya.port.token.SecurityAuthenticationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -53,14 +55,24 @@ class LoanUseCaseTest {
     private LoanUseCase loanUseCase;
 
     private Token token;
+    private TypeLoan typeLoan;
 
     @BeforeEach
     void setUp() {
-
         token = Token.builder()
                 .accessToken("21313")
                 .subject("julian@gmail.com")
                 .role("ADMIN")
+                .build();
+
+        typeLoan = TypeLoan.builder()
+                .id(1L)
+                .name("Préstamo de Libre Inversión")
+                .code("LIBRE_INVERSION")
+                .autoValidation(true)
+                .interestRate(new BigDecimal("0.0500"))
+                .maxAmount(new BigDecimal("50000.00"))
+                .minAmount(new BigDecimal("2000.00"))
                 .build();
     }
 
@@ -68,7 +80,7 @@ class LoanUseCaseTest {
     void saveLoanShouldSaveSuccessfully() {
         Loan loan = new Loan();
         loan.setUserDocument("123");
-
+        loan.setIdTypeLoan(1L);
         User user = new User();
         user.setEmail("julian@gmail.com");
 
@@ -80,8 +92,70 @@ class LoanUseCaseTest {
         when(loanStateRepositoryPort.findByCode(LoanStateCodes.PENDING_REVIEW.getStatus())).thenReturn(Mono.just(pending));
         when(loanRepositoryPort.saveLoan(any(Loan.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
+        when(loanRepositoryPort.findLoansByUserDocumentAndState(any(String.class), any(String.class)))
+                .thenReturn(Flux.empty());
+
+        when(sendQueuePort.sendCalculateDebtCapacity(any(Loan.class), any(List.class), any(User.class)) ).thenReturn(Mono.empty());
+        when(typeLoanRepositoryPort.findById(any(Long.class))  ).thenReturn( Mono.just(typeLoan) );
+
         StepVerifier.create(loanUseCase.saveLoan(loan))
                 .expectNextMatches(saved -> saved.getIdLoanState().equals(1L))
+                .verifyComplete();
+    }
+
+    @Test
+    void updateLoanWithStateLoanShouldUpdateSuccessfully() {
+        Loan loan = new Loan();
+        loan.setId(1L);
+        loan.setIdLoanState(5L);
+
+        LoanState state = new LoanState();
+        state.setId(10L);
+        state.setName("APPROVED");
+
+        when(loanRepositoryPort.findById(1L)).thenReturn(Mono.just(loan));
+        when(loanStateRepositoryPort.findByCode("APPROVED")).thenReturn(Mono.just(state));
+        when(loanRepositoryPort.saveLoan(any(Loan.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(loanUseCase.updateLoanWithStateLoan(1L, "APPROVED"))
+                .expectNextMatches(updated -> updated.getIdLoanState().equals(10L))
+                .verifyComplete();
+    }
+
+    @Test
+    void updateLoanWithStateLoanShouldThrowWhenLoanNotFound() {
+        when(loanRepositoryPort.findById(99L)).thenReturn(Mono.empty());
+
+        StepVerifier.create(loanUseCase.updateLoanWithStateLoan(99L, "APPROVED"))
+                .expectError(CrediyaResourceNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void updateStateLoanShouldSendMessageSuccessfully() {
+        Loan loan = new Loan();
+        loan.setId(1L);
+        loan.setUserDocument("123");
+        loan.setIdLoanState(20L);
+
+        LoanState state = new LoanState();
+        state.setId(20L);
+        state.setName("APPROVED");
+
+        User user = new User();
+        user.setName("John");
+        user.setLastName("Doe");
+        user.setEmail("test@email.com");
+
+        when(loanRepositoryPort.findById(1L)).thenReturn(Mono.just(loan));
+        when(loanStateRepositoryPort.findByCode("APPROVED")).thenReturn(Mono.just(state));
+        when(loanRepositoryPort.saveLoan(any(Loan.class))).thenReturn(Mono.just(loan));
+        when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
+        when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
+        when(sendQueuePort.sendNotificationChangeStateLoan(any(MessageNotificationQueue.class))).thenReturn(Mono.empty());
+
+        StepVerifier.create(loanUseCase.updateStateLoan(1L, "APPROVED"))
+                .expectNext(loan)
                 .verifyComplete();
     }
 
@@ -94,7 +168,6 @@ class LoanUseCaseTest {
                 .amount(BigDecimal.valueOf(1000000.0))
                 .monthTerm(11)
                 .build();
-
 
         LoanState state = LoanState.builder()
                 .id(20L)
@@ -117,7 +190,6 @@ class LoanUseCaseTest {
         when(typeLoanRepositoryPort.findById(10L)).thenReturn(Mono.just(typeLoan));
         when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
         when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
-
 
         StepVerifier.create(loanUseCase.findPageLoans(10, 0, "PENDING"))
                 .expectNextMatches(result ->
@@ -147,6 +219,3 @@ class LoanUseCaseTest {
                 .verifyComplete();
     }
 }
-
-
-
