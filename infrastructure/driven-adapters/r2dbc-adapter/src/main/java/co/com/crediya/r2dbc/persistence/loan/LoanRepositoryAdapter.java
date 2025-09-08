@@ -41,4 +41,9 @@ public class LoanRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.count();
     }
 
+    @Override
+    public Flux<Loan> findLoansByUserDocumentAndState(String userDocument, String state) {
+        return repository.findLoansByUserDocumentAndState(userDocument, state).map(super::toEntity);
+    }
+
 }

@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.RoundingMode;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -46,7 +47,30 @@ public class LoanUseCase {
                 loan.setIdLoanState(loanStatus.getId());
                 return loan;
             })
-            .flatMap(loanRepositoryPort::saveLoan);
+            .flatMap(loanRepositoryPort::saveLoan)
+            .flatMap( saveLoan ->
+                    typeLoanRepositoryPort.findById(loan.getIdTypeLoan())
+                    .filter( TypeLoan::getAutoValidation )
+                    .flatMap( typeLoan ->
+                            loanRepositoryPort.findLoansByUserDocumentAndState(saveLoan.getUserDocument(), saveLoan.getUserDocument())
+                            .flatMap( approvedLoan ->
+                                typeLoanRepositoryPort.findById(approvedLoan.getIdTypeLoan())
+                                .map( approvedTypeLoan -> {
+                                    approvedLoan.setInterestRate(loan.getInterestRate());
+                                    return approvedLoan;
+                                })
+                            )
+                            .collectList()
+                            .zipWith( userServicePort.getUserByDocument(saveLoan.getUserDocument()) )
+                            .flatMap( tuple -> {
+                                List<Loan> loans = tuple.getT1();
+                                User  user = tuple.getT2();
+                                saveLoan.setInterestRate(typeLoan.getInterestRate());
+                                System.out.println("Enviando mensaje a la cola");
+                                return sendQueuePort.sendCalculateDebtCapacity(saveLoan, loans, user).thenReturn(saveLoan);
+                            })
+                    ).switchIfEmpty(Mono.just(saveLoan))
+            );
     }
 
     public Mono<Loan> updateStateLoan(Long idLoan, String codeState) {

@@ -1,8 +1,12 @@
 package co.com.crediya.sqs.sender;
 
+import co.com.crediya.model.Loan;
+import co.com.crediya.port.consumers.model.User;
 import co.com.crediya.port.queue.SendQueuePort;
 import co.com.crediya.port.queue.messages.MessageNotificationQueue;
 import co.com.crediya.sqs.sender.config.SQSSenderProperties;
+import co.com.crediya.sqs.sender.dtos.DebtCapacityQueueDTO;
+import co.com.crediya.sqs.sender.dtos.LoanQueueDTO;
 import co.com.crediya.sqs.sender.mappers.SqsMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,8 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
+
+import java.util.List;
 
 @Service
 @Log4j2
@@ -31,6 +37,19 @@ public class SQSSender implements SendQueuePort {
             .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
             .doOnNext(response -> log.info("Message sent {}", response.messageId()))
             .then(Mono.empty());
+    }
+
+    @Override
+    public Mono<Void> sendCalculateDebtCapacity(Loan loan, List<Loan> approvedLoans, User user) {
+        return Mono.fromCallable( () -> {
+            List<LoanQueueDTO> loans = approvedLoans.stream().map(sqsMapper::modelToQueueDto).toList();
+            LoanQueueDTO currentLoan = sqsMapper.modelToQueueDto(loan);
+            DebtCapacityQueueDTO debtCapacityQueueDTO = new DebtCapacityQueueDTO(user.getBasePayment(), user.getName(), user.getLastName(), loan.getNotificationEmail(), currentLoan, loans);
+            return buildRequest( objectMapper.writeValueAsString(debtCapacityQueueDTO), properties.queueDebtCapacity() );
+        })
+        .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
+        .doOnNext(response -> log.info("Message sent {}", response.messageId()))
+        .then(Mono.empty());
     }
 
     private SendMessageRequest buildRequest(String message, String sqsUrl) {

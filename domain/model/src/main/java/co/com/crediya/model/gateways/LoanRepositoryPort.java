@@ -14,4 +14,6 @@ public interface LoanRepositoryPort {
 
     Mono<Long>  count();
 
+    Flux<Loan> findLoansByUserDocumentAndState( String userDocument, String state );
+
 }

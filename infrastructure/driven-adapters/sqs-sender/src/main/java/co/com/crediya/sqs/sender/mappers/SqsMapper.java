@@ -1,6 +1,8 @@
 package co.com.crediya.sqs.sender.mappers;
 
+import co.com.crediya.model.Loan;
 import co.com.crediya.port.queue.messages.MessageNotificationQueue;
+import co.com.crediya.sqs.sender.dtos.LoanQueueDTO;
 import co.com.crediya.sqs.sender.dtos.MessageNotificationSqsDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,5 +21,11 @@ public interface SqsMapper {
             @Mapping( target = "lastName", source = "clientLastName")
     })
     MessageNotificationSqsDTO messageToSqsDto(MessageNotificationQueue messageNotificationQueue);
+
+    @Mappings(value = {
+            @Mapping(target = "term", source = "monthTerm")
+    })
+    LoanQueueDTO modelToQueueDto(Loan loan);
+
 
 }
