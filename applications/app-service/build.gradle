@@ -18,8 +18,8 @@ dependencies {
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:${springCloudAwsVersion}")
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
+        implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:${springCloudAwsVersion}")
+        implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
 }
 
 tasks.register('explodedJar', Copy) {

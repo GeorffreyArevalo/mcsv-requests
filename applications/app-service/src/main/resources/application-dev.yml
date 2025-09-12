@@ -13,6 +13,7 @@ adapter:
     region: "us-east-1"
     queueNotificationUrl: "https://sqs.us-east-1.amazonaws.com/119694354572/poller-notifications"
     queueDebtCapacity: "https://sqs.us-east-1.amazonaws.com/119694354572/receive-debt-capacity"
+    queueIncreaseReport: "https://sqs.us-east-1.amazonaws.com/119694354572/reports-listener"
 
 entrypoint:
   sqs:

@@ -34,8 +34,8 @@ public class SQSSender implements SendQueuePort {
                 String message = objectMapper.writeValueAsString(sqsMapper.messageToSqsDto(messageNotification));
                 return buildRequest(message, properties.queueNotificationUrl());
             })
+            .doOnNext(messageRequest -> log.info("Message sent - notification {}", messageRequest.messageBody()))
             .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-            .doOnNext(response -> log.info("Message sent - notification {}", response.messageId()))
             .then(Mono.empty());
     }
 
@@ -47,9 +47,17 @@ public class SQSSender implements SendQueuePort {
             DebtCapacityQueueDTO debtCapacityQueueDTO = new DebtCapacityQueueDTO(user.getBasePayment(), user.getName(), user.getLastName(), loan.getNotificationEmail(), currentLoan, loans);
             return buildRequest( objectMapper.writeValueAsString(debtCapacityQueueDTO), properties.queueDebtCapacity() );
         })
+        .doOnNext(messageRequest -> log.info("Message sent - debt capacity {}", messageRequest.messageBody()))
         .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-        .doOnNext(response -> log.info("Message sent - debt capacity {}", response.messageId()))
         .then(Mono.empty());
+    }
+
+    @Override
+    public Mono<Void> sendIncreaseReports(String message) {
+        return Mono.fromCallable( () -> buildRequest( objectMapper.writeValueAsString(message), properties.queueIncreaseReport() ))
+                .doOnNext(messageRequest -> log.info("Message sent - reports {}", messageRequest.messageBody()))
+                .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
+                .then(Mono.empty());
     }
 
     private SendMessageRequest buildRequest(String message, String sqsUrl) {

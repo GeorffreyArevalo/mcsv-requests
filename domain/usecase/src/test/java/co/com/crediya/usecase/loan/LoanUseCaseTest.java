@@ -112,12 +112,14 @@ class LoanUseCaseTest {
         LoanState state = new LoanState();
         state.setId(10L);
         state.setName("APPROVED");
+        state.setCode("APROBADA");
 
         when(loanRepositoryPort.findById(1L)).thenReturn(Mono.just(loan));
         when(loanStateRepositoryPort.findByCode("APPROVED")).thenReturn(Mono.just(state));
         when(loanRepositoryPort.saveLoan(any(Loan.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(sendQueuePort.sendIncreaseReports(any(String.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(loanUseCase.updateLoanWithStateLoan(1L, "APPROVED"))
+        StepVerifier.create(loanUseCase.updateStateLoan(1L, "APPROVED"))
                 .expectNextMatches(updated -> updated.getIdLoanState().equals(10L))
                 .verifyComplete();
     }
@@ -126,13 +128,13 @@ class LoanUseCaseTest {
     void updateLoanWithStateLoanShouldThrowWhenLoanNotFound() {
         when(loanRepositoryPort.findById(99L)).thenReturn(Mono.empty());
 
-        StepVerifier.create(loanUseCase.updateLoanWithStateLoan(99L, "APPROVED"))
+        StepVerifier.create(loanUseCase.updateStateLoan(99L, "APPROVED"))
                 .expectError(CrediyaResourceNotFoundException.class)
                 .verify();
     }
 
     @Test
-    void updateStateLoanShouldSendMessageSuccessfully() {
+    void updateStateLoanAndSendMessageShouldSendMessageSuccessfully() {
         Loan loan = new Loan();
         loan.setId(1L);
         loan.setUserDocument("123");
@@ -141,6 +143,7 @@ class LoanUseCaseTest {
         LoanState state = new LoanState();
         state.setId(20L);
         state.setName("APPROVED");
+        state.setCode("APROBADA");
 
         User user = new User();
         user.setName("John");
@@ -153,8 +156,10 @@ class LoanUseCaseTest {
         when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
         when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
         when(sendQueuePort.sendNotificationChangeStateLoan(any(MessageNotificationQueue.class))).thenReturn(Mono.empty());
+        when(sendQueuePort.sendIncreaseReports(any(String.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(loanUseCase.updateStateLoan(1L, "APPROVED"))
+
+        StepVerifier.create(loanUseCase.updateStateLoanAndSendMessage(1L, "APPROVED"))
                 .expectNext(loan)
                 .verifyComplete();
     }

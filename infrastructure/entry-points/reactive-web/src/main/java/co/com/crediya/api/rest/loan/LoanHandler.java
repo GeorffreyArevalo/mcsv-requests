@@ -75,7 +75,7 @@ public class LoanHandler {
     }
 
 
-    @Operation( tags = "Loans", operationId = "updateStateLoan", description = "Update state of loan", summary = "Update state of loan",
+    @Operation( tags = "Loans", operationId = "updateStateLoanAndSendMessage", description = "Update state of loan", summary = "Update state of loan",
             requestBody = @RequestBody( content = @Content( schema = @Schema( implementation = UpdateStateLoanRequestDTO.class ) ) ),
             parameters = {
                     @Parameter( in = ParameterIn.PATH, name = "id", description = "State of loan", required = true, example = "2" ),
@@ -91,7 +91,7 @@ public class LoanHandler {
         String idLoan = serverRequest.pathVariable("id");
         return serverRequest.bodyToMono(UpdateStateLoanRequestDTO.class)
                 .flatMap( validatorUtil::validate )
-                .flatMap( updateStateLoanRequestDTO -> loanUseCase.updateStateLoan(Long.parseLong(idLoan), updateStateLoanRequestDTO.codeState()) )
+                .flatMap( updateStateLoanRequestDTO -> loanUseCase.updateStateLoanAndSendMessage(Long.parseLong(idLoan), updateStateLoanRequestDTO.codeState()) )
                 .map( loanMapper::modelToResponse )
                 .flatMap( loanResponse ->
                     ServerResponse.ok()

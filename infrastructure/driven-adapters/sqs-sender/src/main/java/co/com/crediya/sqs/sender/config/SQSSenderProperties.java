@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record SQSSenderProperties(
      String region,
      String queueNotificationUrl,
-     String queueDebtCapacity
+     String queueDebtCapacity,
+     String queueIncreaseReport
 ){
 }

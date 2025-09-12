@@ -1,6 +1,7 @@
 package co.com.crediya.usecase.loan;
 
 import co.com.crediya.enums.LoanStateCodes;
+import co.com.crediya.enums.MessagesConstants;
 import co.com.crediya.exceptions.CrediyaForbiddenException;
 import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.exceptions.enums.ExceptionMessages;
@@ -53,26 +54,30 @@ public class LoanUseCase {
 
 
 
-    public Mono<Loan> updateStateLoan(Long idLoan, String codeState) {
-
-        return this.updateLoanWithStateLoan(idLoan, codeState)
+    public Mono<Loan> updateStateLoanAndSendMessage(Long idLoan, String codeState) {
+        return this.updateStateLoan(idLoan, codeState)
             .flatMap( this::sendMessageEmail );
     }
 
-    public Mono<Loan> updateLoanWithStateLoan( Long idLoan, String codeState ) {
+    public Mono<Loan> updateStateLoan(Long idLoan, String codeState ) {
         return loanRepositoryPort.findById(idLoan)
                 .switchIfEmpty( Mono.error(new CrediyaResourceNotFoundException(
                     String.format(ExceptionMessages.LOAN_WITH_ID_NOT_FOUND.getMessage(), idLoan)
                 )) )
                 .flatMap( loan ->
-                loanStateRepositoryPort.findByCode(codeState)
-                .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
-                        String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
-                )))
-                .flatMap( loanState -> {
-                    loan.setIdLoanState(loanState.getId());
-                    return loanRepositoryPort.saveLoan(loan);
-                }));
+                    loanStateRepositoryPort.findByCode(codeState)
+                    .switchIfEmpty(Mono.error(new CrediyaResourceNotFoundException(
+                            String.format(ExceptionMessages.STATE_LOAN_WITH_CODE_NOT_FOUND.getMessage(), codeState)
+                    )))
+                    .flatMap( loanState -> {
+                        loan.setIdLoanState(loanState.getId());
+                        return loanRepositoryPort.saveLoan(loan)
+                                .filter( saveLoan -> loanState.getCode().equals(LoanStateCodes.APPROVED.getStatus()) )
+                                .flatMap( saveLoan -> sendQueuePort.sendIncreaseReports(MessagesConstants.MESSAGE_INCREASE_REPORTS_APPROVED.getValue()))
+                                .thenReturn(loan);
+                    }));
+
+
     }
 
     public Flux<Loan> findPageLoans(int size, int page, String codeState ) {

@@ -20,6 +20,7 @@ adapter:
     region: ${SQS_SENDER_REGION}
     queueNotificationUrl: ${QUEUE_NOTIFICATION_URL_SEND}
     queueDebtCapacity: ${QUEUE_DEBT_CAPACITY_URL_SEND}
+    queueIncreaseReport: ${QUEUE_INCREASE_REPORT}
 
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}

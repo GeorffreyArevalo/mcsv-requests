@@ -13,4 +13,6 @@ public interface SendQueuePort {
 
     Mono<Void> sendCalculateDebtCapacity(Loan loan, List<Loan> approvedLoans, User user);
 
+    Mono<Void> sendIncreaseReports(String message);
+
 }

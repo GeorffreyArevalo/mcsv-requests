@@ -23,7 +23,7 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
     public Mono<Void> apply(Message message) {
         log.info("Received SQS message - update state of loan: {}", message);
         return Mono.fromCallable( () ->  objectMapper.readValue(message.body(), UpdateStateLoanListenerDTO.class))
-                .flatMap( data -> loanUseCase.updateLoanWithStateLoan(data.idLoan(), data.stateLoan()) )
+                .flatMap( data -> loanUseCase.updateStateLoan(data.idLoan(), data.stateLoan()) )
                 .then(Mono.empty());
     }
 }
