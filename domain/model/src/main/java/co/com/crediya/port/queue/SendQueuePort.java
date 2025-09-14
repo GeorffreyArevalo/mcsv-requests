@@ -5,6 +5,7 @@ import co.com.crediya.port.consumers.model.User;
 import co.com.crediya.port.queue.messages.MessageNotificationQueue;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SendQueuePort {
@@ -13,6 +14,6 @@ public interface SendQueuePort {
 
     Mono<Void> sendCalculateDebtCapacity(Loan loan, List<Loan> approvedLoans, User user);
 
-    Mono<Void> sendIncreaseReports(String message);
+    Mono<Void> sendIncreaseReports(BigDecimal amount);
 
 }

@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -53,8 +54,8 @@ public class SQSSender implements SendQueuePort {
     }
 
     @Override
-    public Mono<Void> sendIncreaseReports(String message) {
-        return Mono.fromCallable( () -> buildRequest( objectMapper.writeValueAsString(message), properties.queueIncreaseReport() ))
+    public Mono<Void> sendIncreaseReports(BigDecimal amount) {
+        return Mono.fromCallable( () -> buildRequest( objectMapper.writeValueAsString(String.valueOf(amount)), properties.queueIncreaseReport() ))
                 .doOnNext(messageRequest -> log.info("Message sent - reports {}", messageRequest.messageBody()))
                 .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
                 .then(Mono.empty());

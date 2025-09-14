@@ -1,7 +1,6 @@
 package co.com.crediya.usecase.loan;
 
 import co.com.crediya.enums.LoanStateCodes;
-import co.com.crediya.enums.MessagesConstants;
 import co.com.crediya.exceptions.CrediyaForbiddenException;
 import co.com.crediya.exceptions.CrediyaResourceNotFoundException;
 import co.com.crediya.exceptions.enums.ExceptionMessages;
@@ -73,7 +72,7 @@ public class LoanUseCase {
                         loan.setIdLoanState(loanState.getId());
                         return loanRepositoryPort.saveLoan(loan)
                                 .filter( saveLoan -> loanState.getCode().equals(LoanStateCodes.APPROVED.getStatus()) )
-                                .flatMap( saveLoan -> sendQueuePort.sendIncreaseReports(MessagesConstants.MESSAGE_INCREASE_REPORTS_APPROVED.getValue()))
+                                .flatMap( saveLoan -> sendQueuePort.sendIncreaseReports( loan.getAmount() ))
                                 .thenReturn(loan);
                     }));
 
