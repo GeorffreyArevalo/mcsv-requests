@@ -107,17 +107,17 @@ class LoanUseCaseTest {
     void updateLoanWithStateLoanShouldUpdateSuccessfully() {
         Loan loan = new Loan();
         loan.setId(1L);
+        loan.setAmount(BigDecimal.TEN);
         loan.setIdLoanState(5L);
 
         LoanState state = new LoanState();
         state.setId(10L);
         state.setName("APPROVED");
-        state.setCode("APROBADA");
+        state.setCode("APPROVED");
 
         when(loanRepositoryPort.findById(1L)).thenReturn(Mono.just(loan));
         when(loanStateRepositoryPort.findByCode("APPROVED")).thenReturn(Mono.just(state));
-        when(loanRepositoryPort.saveLoan(any(Loan.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-        when(sendQueuePort.sendIncreaseReports(any(String.class))).thenReturn(Mono.empty());
+        when(loanRepositoryPort.saveLoan(any(Loan.class))).thenReturn( Mono.just(loan) );
 
         StepVerifier.create(loanUseCase.updateStateLoan(1L, "APPROVED"))
                 .expectNextMatches(updated -> updated.getIdLoanState().equals(10L))
@@ -143,7 +143,7 @@ class LoanUseCaseTest {
         LoanState state = new LoanState();
         state.setId(20L);
         state.setName("APPROVED");
-        state.setCode("APROBADA");
+        state.setCode("APPROVED");
 
         User user = new User();
         user.setName("John");
@@ -156,7 +156,6 @@ class LoanUseCaseTest {
         when(userServicePort.getUserByDocument("123")).thenReturn(Mono.just(user));
         when(loanStateRepositoryPort.findById(20L)).thenReturn(Mono.just(state));
         when(sendQueuePort.sendNotificationChangeStateLoan(any(MessageNotificationQueue.class))).thenReturn(Mono.empty());
-        when(sendQueuePort.sendIncreaseReports(any(String.class))).thenReturn(Mono.empty());
 
 
         StepVerifier.create(loanUseCase.updateStateLoanAndSendMessage(1L, "APPROVED"))
