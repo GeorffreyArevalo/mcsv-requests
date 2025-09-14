@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum MessagesConstants {
 
-    MESSAGE_INCREASE_REPORTS_APPROVED("approved_reports");
+    MESSAGE_INCREASE_REPORTS_APPROVED("count_approved_reports");
 
     private final String value;
 
