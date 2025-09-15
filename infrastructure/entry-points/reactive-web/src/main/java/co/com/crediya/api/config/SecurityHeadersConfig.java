@@ -32,7 +32,7 @@ public class SecurityHeadersConfig implements WebFilter {
 
         return Mono.just( request.getPath().value() )
                 .log()
-            .filter( path -> !path.contains("/openapi/") )
+            .filter( path -> !path.contains("/openapi/") && !path.equals("/actuator/health") )
             .flatMap( path ->
                 Mono.justOrEmpty( request.getHeaders().getFirst( HttpHeaders.AUTHORIZATION ) )
                 .switchIfEmpty( Mono.error( new CrediyaUnathorizedException(ExceptionMessages.UNAUTHORIZED_SENT_TOKEN_INVALID.getMessage())) )
