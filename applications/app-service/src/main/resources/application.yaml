@@ -45,8 +45,8 @@ resilience4j:
 
 routes:
   paths:
-    loans: "/api/v1/loans"
-    loansById: "/api/v1/loans/{id}"
+    loans: "/requests/api/v1/loans"
+    loansById: "/requests/api/v1/loans/{id}"
 springdoc:
   swagger-ui:
     path: "/requests/openapi/swagger-ui"
