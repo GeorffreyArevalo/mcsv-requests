@@ -12,6 +12,7 @@ management:
       enabled: true
   endpoints:
     web:
+      base-path: /requests/actuator
       exposure:
         include: "health,prometheus"
   endpoint:
@@ -39,15 +40,18 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+
+
+
 routes:
   paths:
     loans: "/api/v1/loans"
     loansById: "/api/v1/loans/{id}"
 springdoc:
   swagger-ui:
-    path: "/openapi/swagger-ui"
+    path: "/requests/openapi/swagger-ui"
   api-docs:
-    path: "/openapi/v3/api-docs"
+    path: "/requests/openapi/v3/api-docs"
   packages-to-scan:
   - "co.com.crediya"
   paths-to-match:

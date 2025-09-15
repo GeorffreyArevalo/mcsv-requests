@@ -1,4 +1,6 @@
 server:
+  servlet:
+    context-path: /requests
   port: 8081
 
 spring:
