@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   r2dbc:
     url: r2dbc:mysql://localhost:3307/requests?allowPublicKeyRetrieval=true&useSSL=false

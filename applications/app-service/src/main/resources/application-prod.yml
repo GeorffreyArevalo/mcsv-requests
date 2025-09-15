@@ -1,3 +1,6 @@
+server:
+  port: ${PORT}
+
 spring:
   config:
     import: ${AWS_NAME_SECRET_MANAGER}
